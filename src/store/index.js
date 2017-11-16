@@ -6,7 +6,8 @@ Vue.use(Vuex)
 
 const store = new Vuex.Store({
   state: {
-    user: null // Will be bound as an object
+    // Will be bound as an object
+    user: null,
   },
   actions: {
   },
@@ -14,10 +15,10 @@ const store = new Vuex.Store({
     UPDATE_USER (state, user) {
       state.user = user
     },
-    ...firebaseMutations
+    ...firebaseMutations,
   },
   getters: {
-  }
+  },
 })
 
 export default store

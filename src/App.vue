@@ -11,8 +11,8 @@ import MyHeader from '@/components/MyHeader'
 export default {
   name: 'app',
   components: {
-    MyHeader
-  }
+    MyHeader,
+  },
 }
 </script>
 

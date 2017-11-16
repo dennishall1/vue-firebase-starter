@@ -46,19 +46,19 @@ import { mapState } from 'vuex'
 export default {
   data: () => ({
     userMenuOpen: false,
-    userMenuTrigger: null
+    userMenuTrigger: null,
   }),
   computed: {
     ...mapState({
-      user: 'user'
-    })
+      user: 'user',
+    }),
   },
   watch: {
     user (val) {
       if (val) {
         this.userMenuTrigger = this.$refs.userButton.$el
       }
-    }
+    },
   },
   methods: {
     toggle () {
@@ -66,8 +66,8 @@ export default {
     },
     handleClose (e) {
       this.userMenuOpen = false
-    }
-  }
+    },
+  },
 }
 </script>
 <style lang="sass">

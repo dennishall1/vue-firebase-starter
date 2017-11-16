@@ -9,7 +9,7 @@ firebase.initializeApp({
   databaseURL: 'https://vue-boilerplate-5d1f0.firebaseio.com',
   projectId: 'vue-boilerplate-5d1f0',
   storageBucket: 'vue-boilerplate-5d1f0.appspot.com',
-  messagingSenderId: '631758104620'
+  messagingSenderId: '631758104620',
 })
 
 if (__DEV__) {

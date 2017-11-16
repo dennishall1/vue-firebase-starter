@@ -15,7 +15,13 @@ const router = new Router({
   // TODO: should we remember scroll position?
   scrollBehavior: () => ({ y: 0 }),
   routes: [
-    { path: '/', component: Landing },
+    {
+      path: '/',
+      component: Landing,
+      meta: {
+        requiresAuth: true,
+      },
+    },
     {
       path: '/login',
       component: Login,
@@ -25,7 +31,7 @@ const router = new Router({
         } else {
           next()
         }
-      }
+      },
     },
     {
       path: '/logout',
@@ -36,16 +42,24 @@ const router = new Router({
         } else {
           next('/login')
         }
-      }
+      },
     },
     {
       path: '/profile',
       component: Profile,
-      meta: { requiresAuth: true }
+      meta: {
+        requiresAuth: true,
+      },
     },
-    { path: '/aloha', component: Aloha },
-    { path: '*', component: FourOhFour }
-  ]
+    {
+      path: '/aloha',
+      component: Aloha,
+    },
+    {
+      path: '*',
+      component: FourOhFour,
+    },
+  ],
 })
 
 /**
@@ -62,7 +76,7 @@ router.beforeEach((to, from, next) => {
     if (!store.state.user) {
       next({
         path: '/login',
-        query: { redirect: to.fullPath }
+        query: { redirect: to.fullPath },
       })
     } else {
       next()

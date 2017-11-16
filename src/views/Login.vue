@@ -1,6 +1,6 @@
 <template>
   <div class="hello">
-    <h1> this is Login page </h1>
+    <h1>Login</h1>
     <div id="firebaseui-auth-container" />
   </div>
 </template>
@@ -9,16 +9,16 @@ import { mapState } from 'vuex'
 import firebase from 'firebase'
 import firebaseui from 'firebaseui'
 import { ui } from '../initFirebase'
-// import router from '../router'
+import router from '../router'
 
 const uiConfig = {
   callbacks: {
     // Called when the user has been successfully signed in
     signInSuccess (user, credential, redirectUrl) {
-      // router.push('/')
+      router.push('/home')
       // Do not redirect.
       return false
-    }
+    },
   },
   credentialHelper: firebaseui.auth.CredentialHelper.NONE,
   // Opens IDP Providers sign-in flow in a popup
@@ -28,21 +28,21 @@ const uiConfig = {
       provider: firebase.auth.FacebookAuthProvider.PROVIDER_ID,
       scopes: [
         'public_profile',
-        'email'
+        'email',
         // 'user_likes',
         // 'user_friends'
-      ]
+      ],
     },
     {
       provider: firebase.auth.GoogleAuthProvider.PROVIDER_ID,
-      scopes: ['https://www.googleapis.com/auth/plus.login']
+      scopes: ['https://www.googleapis.com/auth/plus.login'],
     },
     {
       provider: firebase.auth.EmailAuthProvider.PROVIDER_ID,
       // Whether the display name should be displayed in Sign Up page.
-      requireDisplayName: true
-    }
-  ]
+      requireDisplayName: true,
+    },
+  ],
   // Terms of service url.
   // tosUrl: 'https://www.google.com'
 }
@@ -52,7 +52,7 @@ export default {
     ui.start('#firebaseui-auth-container', uiConfig)
   },
   computed: {
-    ...mapState(['user'])
+    ...mapState(['user']),
   },
   watch: {
     user (val) {
@@ -63,8 +63,8 @@ export default {
           this.$router.replace('/')
         }
       }
-    }
-  }
+    },
+  },
 }
 </script>
 <style lang="sass">
