@@ -2,7 +2,8 @@
   <mu-appbar id="my-header">
     <!--<mu-icon-button icon="menu" slot="left"/>-->
     <router-link to="/" class="site-logo">
-      <img class="site-logo__image" src="../assets/crown-simple.svg"/>
+      <!--<img class="site-logo__image" src="../assets/crown-simple.svg"/>-->
+      <img class="site-logo__image" src="../assets/football.svg"/>
     </router-link>
 
     <!--<mu-flat-button
@@ -12,7 +13,7 @@
     />-->
     <mu-raised-button
       v-show="!user"
-      label="Login"
+      label="Log In"
       secondary
       slot="right"
       to="/login"
@@ -20,6 +21,7 @@
     <mu-flat-button
       v-show="user"
       :label="user && user.displayName"
+      labelPosition="before"
       slot="right"
       ref="userButton"
       @click="toggle"
@@ -75,10 +77,9 @@ export default {
 <style lang="sass">
 #my-header
   .site-logo
-    float: left;
-    padding: 10px
+    float: left
     .site-logo__image
       display: block
-      width: 50px
-      height: 50px
+      width: 35px
+      height: 35px
 </style>
