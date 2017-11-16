@@ -18,9 +18,9 @@ const router = new Router({
     {
       path: '/',
       component: Landing,
-      meta: {
-        requiresAuth: true,
-      },
+      // meta: {
+      //   requiresAuth: true,
+      // },
     },
     {
       path: '/login',

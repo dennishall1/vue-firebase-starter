@@ -15,7 +15,7 @@ const uiConfig = {
   callbacks: {
     // Called when the user has been successfully signed in
     signInSuccess (user, credential, redirectUrl) {
-      router.push('/home')
+      router.push('/')
       // Do not redirect.
       return false
     },

@@ -9,6 +9,7 @@ function resolve (dir) {
 
 module.exports = {
   entry: {
+    fetch: 'whatwg-fetch',
     app: './src/main.js'
   },
   output: {

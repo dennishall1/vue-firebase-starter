@@ -1,13 +1,15 @@
 <template>
   <mu-appbar id="my-header">
     <!--<mu-icon-button icon="menu" slot="left"/>-->
-    <router-link to="/" class="logo">Logo</router-link>
+    <router-link to="/" class="site-logo">
+      <img class="site-logo__image" src="../assets/crown-simple.svg"/>
+    </router-link>
 
-    <mu-flat-button
+    <!--<mu-flat-button
       label="Aloha"
       slot="right"
       to="aloha"
-    />
+    />-->
     <mu-raised-button
       v-show="!user"
       label="Login"
@@ -72,8 +74,11 @@ export default {
 </script>
 <style lang="sass">
 #my-header
-  .logo
-    color: white
-    text-decoration: none
+  .site-logo
+    float: left;
     padding: 10px
+    .site-logo__image
+      display: block
+      width: 50px
+      height: 50px
 </style>
