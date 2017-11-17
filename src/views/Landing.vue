@@ -7,7 +7,7 @@
           <h3>
             {{ game.team1 }}
           </h3>
-          <img :src="game.team1_logo.slice(4, -1)"/>
+          <img :src="game.team1_logo"/>
         </div>
         <mu-switch
           value=""
@@ -17,7 +17,7 @@
           <h3>
             {{ game.team2 }}
           </h3>
-          <img :src="game.team2_logo.slice(4, -1)"/>
+          <img :src="game.team2_logo"/>
         </div>
       </li>
     </ul>
