@@ -1,7 +1,7 @@
 <template>
   <div id="app">
     <my-header />
-    <router-view></router-view>
+    <router-view />
   </div>
 </template>
 
@@ -19,4 +19,5 @@ export default {
 
 <style lang="sass">
 #app
+  background: #444
 </style>

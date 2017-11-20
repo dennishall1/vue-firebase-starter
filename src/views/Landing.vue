@@ -2,107 +2,156 @@
   <div class="wrapper">
     <h1>Schedule</h1>
     <ul v-if="games && games.length">
-      <li v-for="game in games" v-if="game.team1">
-        <div class="team" @click="toggleTeamPick(0)">
-          <h3>
-            {{ game.team1 }}
-          </h3>
-          <img :src="game.team1_logo"/>
-        </div>
-        <mu-switch
-          value=""
-          @input="toggleTeamPick"
+      <li v-for="(game, gameIndex) in games">
+        <team-card
+          :team="game.gameSchedule.visitorTeam"
+          @pick="toggleTeamPick(gameIndex, 0)"
         />
-        <div class="team" @click="toggleTeamPick(1)">
-          <h3>
-            {{ game.team2 }}
-          </h3>
-          <img :src="game.team2_logo"/>
-        </div>
+        <tristate-toggle
+          :value="picks[gameIndex]"
+          :gameIndex="gameIndex"
+          :isLoading="isLoading"
+          @change="toggleTeamPick"
+        />
+        <team-card
+          :team="game.gameSchedule.homeTeam"
+          @pick="toggleTeamPick(gameIndex, 1)"
+        />
       </li>
     </ul>
   </div>
 </template>
 
 <script>
-import firebase from 'firebase'
-import 'whatwg-fetch'
-export default {
-  name: 'hello',
-  data () {
-    return {
-      games: [],
-      picks: [],
-    }
-  },
-  mounted () {
-    this.getData()
-  },
-  methods: {
-    getData () {
-      // get the games
-      fetch('https://api.apify.com/v1/rs7ntQdHsu4L2g8iA/crawlers/5cCo62Xs7omPRqtNR/lastExec/results?token=icrF4BDXjBePhFcqHFmtd9rf9&format=json&status=SUCCEEDED')
-        .then(response => {
-          return response.json()
-        }).then(json => {
-          this.games = JSON.parse(JSON.stringify(json[0].pageFunctionResult))
-          console.log('parsed json', this.games)
-        }).catch(ex => {
-          console.log('parsing failed', ex)
-        })
-      // todo: get the user's picks
+  import { mapState } from 'vuex'
+  import firebase from 'firebase'
+  // import 'whatwg-fetch'
+  import fetch from 'unfetch'
+  import TeamCard from '@/components/TeamCard'
+  import TristateToggle from '@/components/TristateToggle'
+
+  export default {
+    name: 'Landing',
+    components: {
+      TristateToggle,
+      TeamCard,
     },
-    toggleTeamPick (teamIndex) {
-      var database = firebase.database()
-      // todo: store the pick
-      database.ref('picks/')
-      console.log('toggleTeamPick', teamIndex)
+    computed: {
+      ...mapState({
+        user: 'user',
+      }),
     },
-  },
-}
+    data () {
+      return {
+        isLoading: true,
+        season: null,
+        seasonType: null,
+        week: null,
+        games: [],
+        picks: {},
+      }
+    },
+    watch: {
+      user (val) {
+        if (val) {
+          firebase.database()
+            .ref('picks/user/' + this.user.uid + '/season/' + this.season + '/week/' + this.week + '/game/')
+            .once('value').then(snapshot => {
+              console.log('watch user - snapshot', snapshot.val())
+              this.picks = snapshot.val()
+            })
+        }
+      },
+    },
+    mounted () {
+      this.getData()
+    },
+    methods: {
+      getData () {
+        // get the games
+        // https://feeds.nfl.com/feeds-rs/scores.json
+        // https://feeds.nfl.com/feeds-rs/schedules.json
+        // https://api.apify.com/v1/rs7ntQdHsu4L2g8iA/crawlers/5cCo62Xs7omPRqtNR/lastExec/results?token=icrF4BDXjBePhFcqHFmtd9rf9&format=json&status=SUCCEEDED
+        // fetch('https://feeds.nfl.com/feeds-rs/schedules.json')
+        //   .then(res => {
+        //     return res.json()
+        //   }).then(json => {
+        //     // todo: update the data structure to store BY WEEK
+        //     var schedule = json.gameSchedules.filter(item => {
+        //       return item.seasonType !== 'PRE'
+        //     })
+        //     console.log('schedule', schedule)
+        //     firebase.database()
+        //       .ref('schedules/season/' + json.season + '/REG')
+        //       .set(schedule)
+        //   })
+
+        fetch('https://feeds.nfl.com/feeds-rs/scores.json')
+          .then(response => {
+            return response.json()
+          }).then(json => {
+            // [0].pageFunctionResult
+            this.isLoading = false
+            this.season = json.season
+            this.seasonType = json.seasonType
+            this.week = json.week
+            this.games = json.gameScores
+
+            console.log('parsed json', this.games)
+          }).catch(ex => {
+            console.log('parsing failed', ex)
+          })
+        // todo: get the user's picks
+      },
+      toggleTeamPick (gameIndex, teamIndex) {
+        if (!this.user) return
+        this.isLoading = true
+        this.picks[gameIndex] = teamIndex
+        console.log('toggleTeamPick', gameIndex, teamIndex)
+        // todo: store the pick
+        // todo: make the season (2017) dynamic
+        firebase.database()
+          .ref('picks/user/' + this.user.uid + '/season/' + this.season + '/week/' + this.week + '/game/' + gameIndex)
+          .set(teamIndex)
+          .then(() => {
+            this.isLoading = false
+          })
+      },
+    },
+  }
 </script>
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped>
-.wrapper {
-  text-align: center;
-  padding: 20px;
-}
-h1, h2 {
-  font-weight: normal;
-}
-
-ul {
-  list-style-type: none;
-  padding: 0;
-}
-
-li {
-  display: flex;
-  margin: 0 0 40px;
-  justify-content: center;
-  align-items: center;
-}
-
-li img {
-  width: 100%;
-}
-
-@media (min-width:500px) {
-  li img {
-    width: 200px;
-    height: 136px;
+  .wrapper {
+    text-align: center;
+    padding: 20px;
   }
-}
+  h1, h2 {
+    font-weight: normal;
+    color: white
+  }
 
-.mu-switch {
-  margin: 50px 50px 0;
-  transform: scale(1.5);
-}
-.team {
-  cursor: pointer;
-}
-a {
-  color: #42b983;
-}
+  ul {
+    list-style-type: none;
+    padding: 0;
+  }
+
+  li {
+    display: flex;
+    margin: 0 0 40px;
+    justify-content: center;
+    align-items: center;
+  }
+
+  .mu-switch {
+    margin: 50px 50px 0;
+    transform: scale(1.5);
+  }
+  .team {
+    cursor: pointer;
+  }
+  a {
+    color: #42b983;
+  }
 </style>
