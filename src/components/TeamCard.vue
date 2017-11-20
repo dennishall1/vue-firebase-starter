@@ -15,6 +15,16 @@
       </span>
     </h3>
     <img :src="'http://i.nflcdn.com/static/site/7.5/img/logos/svg/teams-matte-mascot/' + team.nick.toLowerCase() + '.svg'"/>
+    <div
+      v-if="usersWhoPickedThisTeam"
+      v-for="user in usersWhoPickedThisTeam"
+      :class="{
+        'team__picked-by-user': true,
+        'team__picked-by-user--current-user': user.isCurrentUser,
+      }"
+    >
+      {{ user.displayName.split(' ')[0] }}
+    </div>
   </div>
 </template>
 
@@ -27,6 +37,7 @@ export default {
     },
     isPicked: Boolean,
     isGameHasPick: Boolean,
+    usersWhoPickedThisTeam: Array,
   },
   methods: {
     pick () {
@@ -57,6 +68,16 @@ export default {
 
   img {
     width: 100%;
+  }
+
+  .team__picked-by-user {
+    margin: 5px 0 0;
+    color: white;
+    text-transform: none;
+  }
+
+  .team__picked-by-user--current-user {
+    color: #00adea;
   }
 
   @media (min-width:500px) {

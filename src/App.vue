@@ -27,9 +27,13 @@
     font-family: "medium-cond"
     src: url("assets/fonts/medium-cond.woff") format("woff")
 
+  body
+    background: #444!important
+
   #app
     background: #444
     font: 150%/1 medium-cond, Helvetica, Arial
     text-transform: uppercase
     letter-spacing: .05em
+    color: white
 </style>

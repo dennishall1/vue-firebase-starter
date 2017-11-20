@@ -71,4 +71,5 @@
       float: left
       position: relative
       z-index: 3
+      cursor: pointer
 </style>

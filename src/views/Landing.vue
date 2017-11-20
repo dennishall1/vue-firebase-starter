@@ -1,21 +1,33 @@
 <template>
   <div class="wrapper">
     <h1>Standings</h1>
-    <ul v-if="games && games.length">
+    <ul v-if="Object.keys(picks).length === games.length">
       <li v-for="(game, gameIndex) in games">
         <team-card
           stay-alive
           :team="game.gameSchedule.visitorTeam"
-          :isPicked="picks[gameIndex] === 0"
+          :isPicked="game.winner === 'visitor'"
+          :usersWhoPickedThisTeam="leagueUserPicks[getGameKey(gameIndex, 0)]"
         />
-        <span style="display: inline-block; width: 30px;">&nbsp;</span>
+        <span class="score" :data-is-winner="game.winner === 'visitor'">
+          {{ game.gameSchedule.visitorTeam.score || '&nbsp; &nbsp;' }}
+        </span>
+        <span style="display: inline-block; width: 10px;">&nbsp;</span>
+        <span class="score" :data-is-winner="game.winner === 'home'">
+          {{ game.gameSchedule.homeTeam.score || '&nbsp; &nbsp;' }}
+        </span>
         <team-card
           stay-alive
           :team="game.gameSchedule.homeTeam"
-          :isPicked="picks[gameIndex] === 1"
+          :isPicked="game.winner === 'home'"
+          :usersWhoPickedThisTeam="leagueUserPicks[getGameKey(gameIndex, 1)]"
         />
       </li>
     </ul>
+    <div v-if="Object.keys(picks).length === 0" class="must-have-all-picks-notice">
+      Once you make your picks for the week and lock them in,
+      you can see your King of Football member picks and standings here.
+    </div>
   </div>
 </template>
 
@@ -44,17 +56,38 @@
         week: null,
         games: [],
         picks: {},
+        leagueId: '-KzPdROlkcWZDUsd47av',
+        league: {},
         leagueUserPicks: {},
       }
     },
     watch: {
       user (val) {
         if (val) {
+          // get the user ids for the current league
           firebase.database()
-            .ref('picks/user/' + this.user.uid + '/season/' + this.season + '/' + this.seasonType + '/week/' + this.week + '/game/')
+            .ref('leagues/' + this.leagueId)
             .once('value').then(snapshot => {
-              console.log('watch user - snapshot', snapshot.val())
-              this.picks = snapshot.val() || this.picks
+              this.league = snapshot.val()
+              this.league.users[this.user.uid].isCurrentUser = true
+              console.log('watch user - league', this.league)
+              Object.keys(this.league.users).forEach(userUid => {
+                firebase.database()
+                  .ref('picks/user/' + userUid + '/season/' + this.season + '/' + this.seasonType + '/week/' + this.week + '/game')
+                  .on('value', snapshot => {
+                    var res = snapshot.val()
+                    if (this.user.uid === userUid) {
+                      console.log('found current user\'s picks')
+                      this.picks = res
+                    }
+                    console.log('watch user - league user picks', res)
+                    res && Object.keys(res).forEach(gameIndex => {
+                      var key = this.getGameKey(gameIndex, res[gameIndex])
+                      this.leagueUserPicks[key] = this.leagueUserPicks[key] || []
+                      this.leagueUserPicks[key].push(this.league.users[userUid])
+                    })
+                  })
+              })
             })
         }
       },
@@ -63,6 +96,17 @@
       this.getData()
     },
     methods: {
+      getGameKey (gameIndex, teamIndex) {
+        return [
+          this.season,
+          this.seasonType,
+          this.week,
+          '_',
+          gameIndex,
+          '_',
+          teamIndex,
+        ].join('')
+      },
       getData () {
         // get the games
         // https://feeds.nfl.com/feeds-rs/scores.json
@@ -120,6 +164,15 @@
             this.seasonType = json.seasonType
             this.week = json.week
             this.games = json.gameScores
+            this.games.forEach(game => {
+              if (game.score && game.score.phase === 'FINAL') {
+                let homeTeamScore = game.score.homeTeamScore.pointTotal
+                let visitorTeamScore = game.score.visitorTeamScore.pointTotal
+                game.gameSchedule.homeTeam.score = homeTeamScore
+                game.gameSchedule.visitorTeam.score = visitorTeamScore
+                game.winner = visitorTeamScore > homeTeamScore ? 'visitor' : 'home'
+              }
+            })
 
             console.log('parsed json', this.games)
           }).catch(ex => {
@@ -154,7 +207,6 @@
     display: flex;
     margin: 0 0 40px;
     justify-content: center;
-    align-items: center;
   }
 
   .mu-switch {
@@ -164,7 +216,20 @@
   .team {
     cursor: pointer;
   }
+  .score {
+    color: #999;
+    font-size: 60px;
+    width: 70px;
+    text-align: center;
+    padding: 99px 0 0;
+  }
+  .score[data-is-winner="true"] {
+    color: #00adea;
+  }
   a {
     color: #42b983;
+  }
+  .must-have-all-picks-notice {
+    padding-top: 30px;
   }
 </style>
