@@ -9,7 +9,12 @@
           :isGameHasPick="gameIndex in picks"
           @pick="toggleTeamPick(gameIndex, 0)"
         />
-        <span style="display: inline-block; width: 30px;">&nbsp;</span>
+        <tristate-toggle
+          :value="picks[gameIndex]"
+          :gameIndex="gameIndex"
+          :isLoading="isLoading"
+          @change="toggleTeamPick"
+        />
         <team-card
           :team="game.gameSchedule.homeTeam"
           :isPicked="picks[gameIndex] === 1"
@@ -30,7 +35,7 @@
   import TristateToggle from '@/components/TristateToggle'
 
   export default {
-    name: 'Landing',
+    name: 'Picks',
     components: {
       TristateToggle,
       TeamCard,

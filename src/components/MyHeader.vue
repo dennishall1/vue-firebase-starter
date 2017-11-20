@@ -6,11 +6,11 @@
       <img class="site-logo__image" src="../assets/football.svg"/>
     </router-link>
 
-    <!--<mu-flat-button
-      label="Aloha"
+    <mu-flat-button
+      label="Picks"
       slot="right"
-      to="aloha"
-    />-->
+      to="picks"
+    />
     <mu-raised-button
       v-show="!user"
       label="Log In"

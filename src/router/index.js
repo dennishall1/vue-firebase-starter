@@ -3,6 +3,7 @@ import Router from 'vue-router'
 import firebase from 'firebase'
 import store from '@/store'
 import Landing from '@/views/Landing'
+import Picks from '@/views/Picks'
 import Login from '@/views/Login'
 import Profile from '@/views/Profile'
 import Aloha from '@/views/Aloha'
@@ -18,6 +19,13 @@ const router = new Router({
     {
       path: '/',
       component: Landing,
+      // meta: {
+      //   requiresAuth: true,
+      // },
+    },
+    {
+      path: '/picks',
+      component: Picks,
       // meta: {
       //   requiresAuth: true,
       // },

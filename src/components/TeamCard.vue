@@ -1,5 +1,11 @@
 <template>
-  <div class="team" @click="pick">
+  <div
+    @click="pick"
+    :class="{
+      'picked': isPicked,
+      'game-has-pick': isGameHasPick,
+    }"
+  >
     <h3>
       <span class="eyebrow">
         {{ team.cityState.replace(team.nick, '') }}
@@ -19,6 +25,8 @@ export default {
     team: {
       type: Object,
     },
+    isPicked: Boolean,
+    isGameHasPick: Boolean,
   },
   methods: {
     pick () {
@@ -32,6 +40,19 @@ export default {
 
   h3 {
     color: white;
+    font-size: 200%;
+    transition: all .2s;
+    margin: 0 0 10px;
+  }
+  .picked .h3-content {
+    color: #00adea;
+    text-shadow: 0 0 20px #999;
+  }
+
+  .eyebrow {
+    display: block;
+    font: 50% wide, sans-serif;
+    opacity: .7;
   }
 
   img {
