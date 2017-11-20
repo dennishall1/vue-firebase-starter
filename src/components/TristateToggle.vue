@@ -41,20 +41,22 @@
 <style lang="sass">
   .tristate-toggle-wrapper
     margin: 0 10px
-    border-radius: 15px
-    box-shadow: 0 0 25px #000
+    background: url(../assets/siteSprite.png) -203px -239px no-repeat
+    width: 145px
+    padding: 7px
+
   .tristate-toggle
     position: relative
     width: 75px
     height: 30px
     overflow: hidden
-    margin: 0 15px
+    margin: 0 28px
     tranistion: margin .3s
     -webkit-transition: margin .3s
     &.left
-      margin: 0 30px 0 0
+      margin: 0 56px 0 0
     &.right
-      margin: 0 0 0 30px
+      margin: 0 0 0 55px
     &__thumb
       position: absolute
       top: -310px
