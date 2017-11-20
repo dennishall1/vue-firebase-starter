@@ -1,28 +1,55 @@
 <template>
   <div class="wrapper">
+
     <h1>Picks</h1>
+
     <ul v-if="games && games.length">
       <li v-for="(game, gameIndex) in games">
         <team-card
+          stay-alive
           :team="game.gameSchedule.visitorTeam"
           :isPicked="picks[gameIndex] === 0"
           :isGameHasPick="gameIndex in picks"
           @pick="toggleTeamPick(gameIndex, 0)"
-        />
+        ></team-card>
         <tristate-toggle
+          stay-alive
           :value="picks[gameIndex]"
           :gameIndex="gameIndex"
           :isLoading="isLoading"
           @change="toggleTeamPick"
-        />
+        ></tristate-toggle>
         <team-card
+          stay-alive
           :team="game.gameSchedule.homeTeam"
           :isPicked="picks[gameIndex] === 1"
           :isGameHasPick="gameIndex in picks"
           @pick="toggleTeamPick(gameIndex, 1)"
-        />
+        ></team-card>
       </li>
     </ul>
+
+    <mu-dialog
+      :open="shouldShowLockPicksDialog"
+    >
+      <h3>Are you sure you want to lock in your picks?</h3>
+      <mu-raised-button
+        label="No"
+        @click="shouldShowLockPicksDialog = false"
+      ></mu-raised-button>
+      &nbsp;
+      <mu-raised-button
+        label="Yes - Lock in My Picks"
+        @click="lockPicks"
+      ></mu-raised-button>
+    </mu-dialog>
+
+    <mu-raised-button
+      label="Lock Picks"
+      :disabled="Object.keys(picks).length !== games.length"
+      @click="showLockPicksModal"
+    ></mu-raised-button>
+
   </div>
 </template>
 
@@ -53,16 +80,17 @@
         week: null,
         games: [],
         picks: {},
+        shouldShowLockPicksDialog: false,
       }
     },
     watch: {
       user (val) {
         if (val) {
           firebase.database()
-            .ref('picks/user/' + this.user.uid + '/season/' + this.season + '/week/' + this.week + '/game/')
+            .ref('picks/user/' + this.user.uid + '/season/' + this.season + '/' + this.seasonType + '/week/' + this.week + '/game/')
             .once('value').then(snapshot => {
               console.log('watch user - snapshot', snapshot.val())
-              this.picks = snapshot.val()
+              this.picks = snapshot.val() || this.picks
             })
         }
       },
@@ -76,20 +104,6 @@
         // https://feeds.nfl.com/feeds-rs/scores.json
         // https://feeds.nfl.com/feeds-rs/schedules.json
         // https://api.apify.com/v1/rs7ntQdHsu4L2g8iA/crawlers/5cCo62Xs7omPRqtNR/lastExec/results?token=icrF4BDXjBePhFcqHFmtd9rf9&format=json&status=SUCCEEDED
-        // fetch('https://feeds.nfl.com/feeds-rs/schedules.json')
-        //   .then(res => {
-        //     return res.json()
-        //   }).then(json => {
-        //     // todo: update the data structure to store BY WEEK
-        //     var schedule = json.gameSchedules.filter(item => {
-        //       return item.seasonType !== 'PRE'
-        //     })
-        //     console.log('schedule', schedule)
-        //     firebase.database()
-        //       .ref('schedules/season/' + json.season + '/REG')
-        //       .set(schedule)
-        //   })
-
         fetch('https://feeds.nfl.com/feeds-rs/scores.json')
           .then(response => {
             return response.json()
@@ -105,20 +119,30 @@
           }).catch(ex => {
             console.log('parsing failed', ex)
           })
-        // todo: get the user's picks
       },
       toggleTeamPick (gameIndex, teamIndex) {
-        if (!this.user) return
+        if (!this.user || this.isLoading) return
         this.isLoading = true
         this.picks[gameIndex] = teamIndex
         console.log('toggleTeamPick', gameIndex, teamIndex)
-        // todo: store the pick
-        // todo: make the season (2017) dynamic
         firebase.database()
-          .ref('picks/user/' + this.user.uid + '/season/' + this.season + '/week/' + this.week + '/game/' + gameIndex)
+          .ref('picks/user/' + this.user.uid + '/season/' + this.season + '/' + this.seasonType + '/week/' + this.week + '/game/' + gameIndex)
           .set(teamIndex)
           .then(() => {
             this.isLoading = false
+          })
+      },
+      showLockPicksModal () {
+        this.shouldShowLockPicksDialog = true
+      },
+      lockPicks () {
+        if (!this.user || this.isLoading) return
+        firebase.database()
+          .ref('picks/user/' + this.user.uid + '/season/' + this.season + '/' + this.seasonType + '/week/' + this.week + '/is-locked')
+          .set(true)
+          .then(() => {
+            this.isLoading = false
+            this.shouldShowLockPicksDialog = false
           })
       },
     },
@@ -129,7 +153,11 @@
 <style scoped>
   .wrapper {
     text-align: center;
-    padding: 20px;
+    padding: 20px 20px 90px;
+  }
+  h1 {
+    font-family: bold-cond;
+    font-size: 50px;
   }
   h1, h2 {
     font-weight: normal;
