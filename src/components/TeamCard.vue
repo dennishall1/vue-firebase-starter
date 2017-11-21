@@ -1,27 +1,33 @@
 <template>
-  <div
-    @click="pick"
-    :class="{
-      'picked': isPicked,
-      'game-has-pick': isGameHasPick,
-    }"
-  >
-    <h3>
-      <span class="eyebrow">
-        {{ team.cityState.replace(team.nick, '') }}
-      </span>
-      <span class="h3-content">
-        {{ team.nick }}
-      </span>
-    </h3>
-    <img :src="'http://i.nflcdn.com/static/site/7.5/img/logos/svg/teams-matte-mascot/' + team.nick.toLowerCase() + '.svg'"/>
+  <div class="team-card-wrapper">
+    <div
+      @click="pick"
+      :class="{
+        'team-card': true,
+        'picked': isPicked,
+        'game-has-pick': isGameHasPick,
+      }"
+    >
+      <h3>
+        <span class="eyebrow">
+          {{ team.cityState.replace(team.nick, '') }}
+        </span>
+        <span class="h3-content">
+          {{ team.nick }}
+        </span>
+      </h3>
+      <img
+        class="team-card__image"
+        :src="'http://i.nflcdn.com/static/site/7.5/img/logos/svg/teams-matte-mascot/' + team.nick.toLowerCase() + '.svg'"
+      />
+    </div>
     <div
       v-if="usersWhoPickedThisTeam"
       v-for="user in usersWhoPickedThisTeam"
       :class="{
-        'team__picked-by-user': true,
-        'team__picked-by-user--current-user': user.isCurrentUser,
-      }"
+          'team-card__picked-by-user': true,
+          'team-card__picked-by-user--current-user': user.isCurrentUser,
+        }"
     >
       {{ user.displayName.split(' ')[0] }}
     </div>
@@ -48,7 +54,6 @@ export default {
 </script>
 
 <style scoped>
-
   h3 {
     color: white;
     font-size: 200%;
@@ -59,31 +64,23 @@ export default {
     color: #00adea;
     text-shadow: 0 0 20px #999;
   }
-
   .eyebrow {
     display: block;
     font: 50% wide, sans-serif;
     opacity: .7;
   }
-
-  img {
-    width: 100%;
-  }
-
-  .team__picked-by-user {
-    margin: 5px 0 0;
+  .team-card__picked-by-user {
+    display: inline-block;
+    margin: 5px;
     color: white;
     text-transform: none;
   }
-
-  .team__picked-by-user--current-user {
+  .team-card__picked-by-user--current-user {
     color: #00adea;
   }
-
-  @media (min-width:500px) {
-    img {
-      width: 200px;
-      height: 136px;
+  @media (max-width: 600px) {
+    h3 {
+      font-size: 20px;
     }
   }
 </style>

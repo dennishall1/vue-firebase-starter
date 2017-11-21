@@ -8,23 +8,31 @@
         <team-card
           stay-alive
           :team="game.gameSchedule.visitorTeam"
-          :isPicked="picks[gameIndex] === 0"
+          :isPicked="picks[gameIndex] === '0'"
           :isGameHasPick="gameIndex in picks"
-          @pick="toggleTeamPick(gameIndex, 0)"
+          @pick="toggleTeamPick(gameIndex, '0')"
         ></team-card>
+        <mu-radio
+          v-model="picks[gameIndex]"
+          nativeValue="0">
+        </mu-radio>
         <tristate-toggle
           stay-alive
-          :value="picks[gameIndex]"
+          :value="Number(picks[gameIndex])"
           :gameIndex="gameIndex"
           :isLoading="isLoading"
           @change="toggleTeamPick"
         ></tristate-toggle>
+        <mu-radio
+          v-model="picks[gameIndex]"
+          nativeValue="1">
+        </mu-radio>
         <team-card
           stay-alive
           :team="game.gameSchedule.homeTeam"
-          :isPicked="picks[gameIndex] === 1"
+          :isPicked="picks[gameIndex] === '1'"
           :isGameHasPick="gameIndex in picks"
-          @pick="toggleTeamPick(gameIndex, 1)"
+          @pick="toggleTeamPick(gameIndex, '1')"
         ></team-card>
       </li>
     </ul>
@@ -39,7 +47,7 @@
       ></mu-raised-button>
       &nbsp;
       <mu-raised-button
-        label="Yes - Lock in My Picks"
+        label="Yes"
         @click="lockPicks"
       ></mu-raised-button>
     </mu-dialog>
@@ -91,6 +99,9 @@
             .once('value').then(snapshot => {
               console.log('watch user - snapshot', snapshot.val())
               this.picks = snapshot.val() || this.picks
+              this.picks.forEach((game, gameIndex) => {
+                this.picks[gameIndex] = this.picks[gameIndex].toString()
+              })
             })
         }
       },
@@ -149,41 +160,72 @@
   }
 </script>
 
-<!-- Add "scoped" attribute to limit CSS to this component only -->
-<style scoped>
-  .wrapper {
-    text-align: center;
-    padding: 20px 20px 90px;
-  }
-  h1 {
-    font-family: bold-cond;
-    font-size: 50px;
-  }
-  h1, h2 {
-    font-weight: normal;
+<style lang="sass">
+  .wrapper
+    text-align: center
+    padding: 20px 20px 90px
+
+  h1
+    font-family: bold-cond
+    font-size: 50px
+
+  h1, h2
+    font-weight: normal
     color: white
-  }
 
-  ul {
-    list-style-type: none;
-    padding: 0;
-  }
+  ul
+    list-style-type: none
+    padding: 0
 
-  li {
-    display: flex;
-    margin: 0 0 40px;
-    justify-content: center;
-    align-items: center;
-  }
+  li
+    display: flex
+    margin: 0 0 40px
+    justify-content: center
+    align-items: center
 
-  .mu-switch {
-    margin: 50px 50px 0;
-    transform: scale(1.5);
-  }
-  .team {
-    cursor: pointer;
-  }
-  a {
-    color: #42b983;
-  }
+  .team-card
+    width: 300px
+    cursor: pointer
+    display: flex
+    align-items: flex-start
+    flex-direction: row-reverse
+    justify-content: space-between
+    text-align: right
+    &__image
+      width: 100px
+      height: auto
+  .team-card-wrapper ~ .team-card-wrapper
+    .team-card
+      flex-direction: row
+      text-align: left
+
+  .mu-radio
+    display: none!important
+
+
+  @media (max-width: 600px)
+    h1
+      font-size: 40px
+    h3
+      text-align: center
+
+    li
+      align-items: flex-start
+
+    .team-card
+      width: auto
+      display: block
+      &.game-has-pick:not(.picked)
+        opacity: .7
+      &__image
+        width: 100px
+        height: auto
+
+    .mu-radio
+      display: inline-block!important
+      margin: 5px
+
+    .tristate-toggle-wrapper
+      display: none
+
 </style>

@@ -40,7 +40,7 @@
 
 <style lang="sass">
   .tristate-toggle-wrapper
-    margin: 0 10px
+    margin: 0 40px
     background: url(../assets/siteSprite.png) -203px -239px no-repeat
     width: 145px
     padding: 7px

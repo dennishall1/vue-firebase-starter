@@ -183,53 +183,75 @@
   }
 </script>
 
-<!-- Add "scoped" attribute to limit CSS to this component only -->
-<style scoped>
-  .wrapper {
-    text-align: center;
-    padding: 20px;
-  }
-  h1 {
-    font-family: bold-cond;
-    font-size: 50px;
-  }
-  h1, h2 {
-    font-weight: normal;
+<style lang="sass">
+  .wrapper
+    text-align: center
+    padding: 20px 20px 90px
+
+  h1
+    font-family: bold-cond
+    font-size: 50px
+
+  h1, h2
+    font-weight: normal
     color: white
-  }
 
-  ul {
-    list-style-type: none;
-    padding: 0;
-  }
+  ul
+    list-style-type: none
+    padding: 0
 
-  li {
-    display: flex;
-    margin: 0 0 40px;
-    justify-content: center;
-  }
+  li
+    display: flex
+    margin: 0 0 40px
+    justify-content: center
+    align-items: flex-start
 
-  .mu-switch {
-    margin: 50px 50px 0;
-    transform: scale(1.5);
-  }
-  .team {
-    cursor: pointer;
-  }
-  .score {
-    color: #999;
-    font-size: 60px;
-    width: 70px;
-    text-align: center;
-    padding: 99px 0 0;
-  }
-  .score[data-is-winner="true"] {
-    color: #00adea;
-  }
-  a {
-    color: #42b983;
-  }
-  .must-have-all-picks-notice {
-    padding-top: 30px;
-  }
+  .team-card
+    width: 300px
+    cursor: pointer
+    display: flex
+    align-items: flex-start
+    flex-direction: row-reverse
+    justify-content: space-between
+    text-align: right
+    &__image
+      width: 100px
+      height: auto
+  .team-card-wrapper ~ .team-card-wrapper
+    .team-card
+      flex-direction: row
+      text-align: left
+
+  .score
+    color: #999
+    font-size: 60px
+    width: 70px
+    text-align: center
+    padding: 10px 0 0
+
+  .score[data-is-winner="true"]
+    color: #00adea
+
+  .must-have-all-picks-notice
+    padding-top: 30px
+
+
+  @media (max-width: 600px)
+    h1
+      font-size: 40px
+    h3
+      text-align: center
+
+    li
+      align-items: flex-start
+
+    .team-card
+      width: auto
+      display: block
+      &.game-has-pick:not(.picked)
+        opacity: .7
+      &__image
+        width: 100px
+        height: auto
+
 </style>
