@@ -12,7 +12,7 @@
         <span class="score" :data-is-winner="game.winner === 'visitor'">
           {{ game.gameSchedule.visitorTeam.score || '&nbsp; &nbsp;' }}
         </span>
-        <span style="display: inline-block; width: 10px;">&nbsp;</span>
+        <span style="display: none; width: 10px;">&nbsp;</span>
         <span class="score" :data-is-winner="game.winner === 'home'">
           {{ game.gameSchedule.homeTeam.score || '&nbsp; &nbsp;' }}
         </span>
@@ -253,5 +253,8 @@
       &__image
         width: 100px
         height: auto
+    .score
+      font-size: 30px
+      padding-top: 55px
 
 </style>
