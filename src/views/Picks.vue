@@ -1,5 +1,5 @@
 <template>
-  <div class="wrapper">
+  <div class="wrapper picks">
 
     <h1>Picks</h1>
 
@@ -161,71 +161,71 @@
 </script>
 
 <style lang="sass">
-  .wrapper
+  .picks
     text-align: center
     padding: 20px 20px 90px
 
-  h1
-    font-family: bold-cond
-    font-size: 50px
-
-  h1, h2
-    font-weight: normal
-    color: white
-
-  ul
-    list-style-type: none
-    padding: 0
-
-  li
-    display: flex
-    margin: 0 0 40px
-    justify-content: center
-    align-items: center
-
-  .team-card
-    width: 300px
-    cursor: pointer
-    display: flex
-    align-items: flex-start
-    flex-direction: row-reverse
-    justify-content: space-between
-    text-align: right
-    &__image
-      width: 100px
-      height: auto
-  .team-card-wrapper ~ .team-card-wrapper
-    .team-card
-      flex-direction: row
-      text-align: left
-
-  .mu-radio
-    display: none!important
-
-
-  @media (max-width: 600px)
     h1
-      font-size: 40px
-    h3
-      text-align: center
+      font-family: bold-cond
+      font-size: 50px
+
+    h1, h2
+      font-weight: normal
+      color: white
+
+    ul
+      list-style-type: none
+      padding: 0
 
     li
-      align-items: flex-start
+      display: flex
+      margin: 0 0 40px
+      justify-content: center
+      align-items: center
 
     .team-card
-      width: auto
-      display: block
-      &.game-has-pick:not(.picked)
-        opacity: .7
+      width: 300px
+      cursor: pointer
+      display: flex
+      align-items: flex-start
+      flex-direction: row-reverse
+      justify-content: space-between
+      text-align: right
       &__image
         width: 100px
         height: auto
+    .team-card-wrapper ~ .team-card-wrapper
+      .team-card
+        flex-direction: row
+        text-align: left
 
     .mu-radio
-      display: inline-block!important
-      margin: 5px
+      display: none!important
 
-    .tristate-toggle-wrapper
-      display: none
+
+    @media (max-width: 600px)
+      h1
+        font-size: 40px
+      h3
+        text-align: center
+
+      li
+        align-items: flex-start
+
+      .team-card
+        width: auto
+        display: block
+        &.game-has-pick:not(.picked)
+          opacity: .7
+        &__image
+          width: 100px
+          height: auto
+
+      .mu-radio
+        display: inline-block!important
+        margin: 5px
+
+      .tristate-toggle-wrapper
+        display: none
 
 </style>
