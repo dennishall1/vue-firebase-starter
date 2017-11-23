@@ -1,7 +1,11 @@
-<template>
+<template stay-alive>
   <div class="wrapper picks">
 
     <h1>Picks</h1>
+
+    <p v-if="isPicksLocked">
+      Your picks are locked in for this week.<br/><br/>
+    </p>
 
     <ul v-if="games && games.length">
       <li v-for="(game, gameIndex) in games">
@@ -55,6 +59,7 @@
     <mu-raised-button
       label="Lock Picks"
       :disabled="Object.keys(picks).length !== games.length"
+      v-if="!isPicksLocked"
       @click="showLockPicksModal"
     ></mu-raised-button>
 
@@ -82,6 +87,7 @@
     },
     data () {
       return {
+        isPicksLocked: false,
         isLoading: true,
         season: null,
         seasonType: null,
@@ -95,10 +101,13 @@
       user (val) {
         if (val) {
           firebase.database()
-            .ref('picks/user/' + this.user.uid + '/season/' + this.season + '/' + this.seasonType + '/week/' + this.week + '/game/')
+            .ref('picks/user/' + this.user.uid + '/season/' + this.season + '/' + this.seasonType + '/week/' + this.week)
             .once('value').then(snapshot => {
-              console.log('watch user - snapshot', snapshot.val())
-              this.picks = snapshot.val() || this.picks
+              var val = snapshot.val()
+              console.log('watch user - snapshot', val)
+              if (!val) return // it's a new week, or the user has not picked anything yet
+              this.isPicksLocked = val['is-locked']
+              this.picks = val.game || this.picks
               this.picks.forEach((game, gameIndex) => {
                 this.picks[gameIndex] = this.picks[gameIndex].toString()
               })
@@ -132,7 +141,7 @@
           })
       },
       toggleTeamPick (gameIndex, teamIndex) {
-        if (!this.user || this.isLoading) return
+        if (this.isPicksLocked || !this.user || this.isLoading) return
         this.isLoading = true
         this.picks[gameIndex] = teamIndex
         console.log('toggleTeamPick', gameIndex, teamIndex)
@@ -148,6 +157,8 @@
       },
       lockPicks () {
         if (!this.user || this.isLoading) return
+        this.isPicksLocked = true
+        window.scrollTo(0, 0)
         firebase.database()
           .ref('picks/user/' + this.user.uid + '/season/' + this.season + '/' + this.seasonType + '/week/' + this.week + '/is-locked')
           .set(true)
@@ -184,7 +195,7 @@
       align-items: center
 
     .team-card
-      width: 300px
+      width: 315px
       cursor: pointer
       display: flex
       align-items: flex-start

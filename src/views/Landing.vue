@@ -1,4 +1,4 @@
-<template>
+<template stay-alive>
   <div class="wrapper standings">
     <h1>Standings</h1>
     <ul v-if="Object.keys(picks).length === games.length">
@@ -6,8 +6,13 @@
         v-for="(game, gameIndex) in games"
         :class="{
           'is-game-irrelevant': (
-            Object.keys(leagueUserPicks[getGameKey(gameIndex, 0)] || {}).length === 0 ||
-            Object.keys(leagueUserPicks[getGameKey(gameIndex, 1)] || {}).length === 0
+            (
+              Object.keys(leagueUserPicks[getGameKey(gameIndex, 0)] || {}).length === 0 ||
+              Object.keys(leagueUserPicks[getGameKey(gameIndex, 1)] || {}).length === 0
+            ) && (
+              Object.keys(leagueUserPicks[getGameKey(gameIndex, 0)] || {}).length !== 1 &&
+              Object.keys(leagueUserPicks[getGameKey(gameIndex, 1)] || {}).length !== 1
+            )
           )
         }"
       >
@@ -33,8 +38,10 @@
       </li>
     </ul>
     <div v-if="Object.keys(picks).length === 0" class="must-have-all-picks-notice">
-      Once you make your picks for the week and lock them in,
-      you can see your King of Football member picks and standings here.
+      Once you <a href="/picks">make your picks</a> for the week and lock them in,
+      you can see your King of Football member picks and standings here.<br/><br/>
+      (If you already made your picks and locked them in, you may need to refresh this page.
+      Sorry for the inconvenience.)
     </div>
   </div>
 </template>
@@ -137,19 +144,24 @@
           })
         /**/
 
-        /**/
+        /** /
         firebase.database()
-         .ref('leagues/-KzPdROlkcWZDUsd47av/users/cz4AQCuGGkeuFmY3aV56hzI3xwz2')
+         .ref('leagues/-KzPdROlkcWZDUsd47av/users/2qi3epBel9aEYOEGD19iUq6vFjG3')
          .set({
-           displayName: 'John',
+           displayName: 'Ges',
          })
         /**/
 
-        /**/
+        /** /
         firebase.database()
           .ref('users')
           .set({
-            'cz4AQCuGGkeuFmY3aV56hzI3xwz2': {
+            '2qi3epBel9aEYOEGD19iUq6vFjG3': { // ges
+              leagues: {
+                '-KzPdROlkcWZDUsd47av': 1,
+              },
+            },
+            'cz4AQCuGGkeuFmY3aV56hzI3xwz2': { // john
               leagues: {
                 '-KzPdROlkcWZDUsd47av': 1,
               },
@@ -223,7 +235,7 @@
         transform: scale(.9)
 
     .team-card
-      width: 300px
+      width: 315px
       cursor: pointer
       display: flex
       align-items: flex-start
@@ -233,10 +245,13 @@
       &__image
         width: 100px
         height: auto
-    .team-card-wrapper ~ .team-card-wrapper
-      .team-card
-        flex-direction: row
+    .team-card-wrapper
+      text-align: right
+      & ~ .team-card-wrapper
         text-align: left
+        .team-card
+          flex-direction: row
+          text-align: left
 
     .score
       color: #999
