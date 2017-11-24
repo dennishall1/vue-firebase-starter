@@ -146,10 +146,19 @@
         this.picks[gameIndex] = teamIndex
         console.log('toggleTeamPick', gameIndex, teamIndex)
         firebase.database()
-          .ref('picks/user/' + this.user.uid + '/season/' + this.season + '/' + this.seasonType + '/week/' + this.week + '/game/' + gameIndex)
-          .set(teamIndex)
-          .then(() => {
-            this.isLoading = false
+          .ref('picks/user/' + this.user.uid + '/season/' + this.season + '/' + this.seasonType + '/week/' + this.week + '/is-locked')
+          .once('value').then(snapshot => {
+            var val = snapshot.val()
+            console.log('watch user - snapshot', val)
+            if (!val) return // it's a new week, or the user has not picked anything yet
+            this.isPicksLocked = val['is-locked']
+            if (this.isPicksLocked) return
+            firebase.database()
+              .ref('picks/user/' + this.user.uid + '/season/' + this.season + '/' + this.seasonType + '/week/' + this.week + '/game/' + gameIndex)
+              .set(teamIndex)
+              .then(() => {
+                this.isLoading = false
+              })
           })
       },
       showLockPicksModal () {
