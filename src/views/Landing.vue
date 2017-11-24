@@ -1,41 +1,51 @@
 <template stay-alive>
   <div class="wrapper standings">
-    <h1>Standings</h1>
+    <h1>Week {{ week }}</h1>
     <ul v-if="Object.keys(picks).length === games.length">
-      <li
+      <template
         v-for="(game, gameIndex) in games"
-        :class="{
-          'is-game-irrelevant': (
-            (
-              Object.keys(leagueUserPicks[getGameKey(gameIndex, 0)] || {}).length === 0 ||
-              Object.keys(leagueUserPicks[getGameKey(gameIndex, 1)] || {}).length === 0
-            ) && (
-              Object.keys(leagueUserPicks[getGameKey(gameIndex, 0)] || {}).length !== 1 &&
-              Object.keys(leagueUserPicks[getGameKey(gameIndex, 1)] || {}).length !== 1
-            )
-          )
-        }"
       >
-        <team-card
-          stay-alive
-          :team="game.gameSchedule.visitorTeam"
-          :isPicked="game.winner === 'visitor'"
-          :usersWhoPickedThisTeam="leagueUserPicks[getGameKey(gameIndex, 0)]"
-        />
-        <span class="score" :data-is-winner="game.winner === 'visitor'">
-          {{ game.gameSchedule.visitorTeam.score || '&nbsp; &nbsp;' }}
-        </span>
-        <span style="display: none; width: 10px;">&nbsp;</span>
-        <span class="score" :data-is-winner="game.winner === 'home'">
-          {{ game.gameSchedule.homeTeam.score || '&nbsp; &nbsp;' }}
-        </span>
-        <team-card
-          stay-alive
-          :team="game.gameSchedule.homeTeam"
-          :isPicked="game.winner === 'home'"
-          :usersWhoPickedThisTeam="leagueUserPicks[getGameKey(gameIndex, 1)]"
-        />
-      </li>
+        <li
+          class="date-header"
+        >
+          {{ game.dayOfWeek }}
+          {{ game.timeOfDay }}
+          {{ game.amOrPm }}
+        </li>
+        <li
+          :class="{
+            'is-game-irrelevant': (
+              (
+                Object.keys(leagueUserPicks[getGameKey(gameIndex, 0)] || {}).length === 0 ||
+                Object.keys(leagueUserPicks[getGameKey(gameIndex, 1)] || {}).length === 0
+              ) && (
+                Object.keys(leagueUserPicks[getGameKey(gameIndex, 0)] || {}).length !== 1 &&
+                Object.keys(leagueUserPicks[getGameKey(gameIndex, 1)] || {}).length !== 1
+              )
+            )
+          }"
+        >
+          <team-card
+            stay-alive
+            :team="game.gameSchedule.visitorTeam"
+            :isPicked="game.winner === 'visitor'"
+            :usersWhoPickedThisTeam="leagueUserPicks[getGameKey(gameIndex, 0)]"
+          />
+          <span class="score" :data-is-winner="game.winner === 'visitor'">
+            {{ game.gameSchedule.visitorTeam.score || '&nbsp; &nbsp;' }}
+          </span>
+          <span style="display: none; width: 10px;">&nbsp;</span>
+          <span class="score" :data-is-winner="game.winner === 'home'">
+            {{ game.gameSchedule.homeTeam.score || '&nbsp; &nbsp;' }}
+          </span>
+          <team-card
+            stay-alive
+            :team="game.gameSchedule.homeTeam"
+            :isPicked="game.winner === 'home'"
+            :usersWhoPickedThisTeam="leagueUserPicks[getGameKey(gameIndex, 1)]"
+          />
+        </li>
+      </template>
     </ul>
     <div v-if="Object.keys(picks).length === 0" class="must-have-all-picks-notice">
       Once you <a href="/picks">make your picks</a> for the week and lock them in,
@@ -146,9 +156,9 @@
 
         /** /
         firebase.database()
-         .ref('leagues/-KzPdROlkcWZDUsd47av/users/2qi3epBel9aEYOEGD19iUq6vFjG3')
+         .ref('leagues/-KzPdROlkcWZDUsd47av/users/aWyGTnMqwQPkeQyEHPqmNWScZ452')
          .set({
-           displayName: 'Ges',
+           displayName: 'Jeremy',
          })
         /**/
 
@@ -190,6 +200,12 @@
             this.week = json.week
             this.games = json.gameScores
             this.games.forEach(game => {
+              var dayNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']
+              game.dayOfWeek = dayNames[new Date(game.gameSchedule.gameDate).getDay()]
+              game.timeOfDay = game.gameSchedule.gameTimeEastern.split(':')
+              game.amOrPm = Number(game.timeOfDay[0]) > 11 ? 'pm' : 'am'
+              game.timeOfDay[0] = Number(game.timeOfDay[0]) > 12 ? Number(game.timeOfDay[0]) - 12 : game.timeOfDay[0]
+              game.timeOfDay = game.timeOfDay.join(':').replace(/:00$/, '')
               if (game.score && game.score.phase === 'FINAL') {
                 let homeTeamScore = game.score.homeTeamScore.pointTotal
                 let visitorTeamScore = game.score.visitorTeamScore.pointTotal
@@ -231,8 +247,10 @@
       justify-content: center
       align-items: flex-start
       &.is-game-irrelevant
-        opacity: .4
+        opacity: .7
         transform: scale(.9)
+      &.date-header
+        margin: 0 0 5px
 
     .team-card
       width: 315px
