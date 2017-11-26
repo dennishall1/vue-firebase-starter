@@ -12,31 +12,31 @@
         <team-card
           stay-alive
           :team="game.gameSchedule.visitorTeam"
-          :isPicked="picks[gameIndex] === '0'"
-          :isGameHasPick="gameIndex in picks"
-          @pick="toggleTeamPick(gameIndex, '0')"
+          :isPicked="picks[game.gameSchedule.gameId] === '0'"
+          :isGameHasPick="game.gameSchedule.gameId in picks"
+          @pick="toggleTeamPick(game.gameSchedule.gameId, '0')"
         ></team-card>
         <mu-radio
-          v-model="picks[gameIndex]"
+          v-model="picks[game.gameSchedule.gameId]"
           nativeValue="0">
         </mu-radio>
         <tristate-toggle
           stay-alive
-          :value="Number(picks[gameIndex])"
-          :gameIndex="gameIndex"
+          :value="Number(picks[game.gameSchedule.gameId])"
+          :gameId="game.gameSchedule.gameId"
           :isLoading="isLoading"
           @change="toggleTeamPick"
         ></tristate-toggle>
         <mu-radio
-          v-model="picks[gameIndex]"
+          v-model="picks[game.gameSchedule.gameId]"
           nativeValue="1">
         </mu-radio>
         <team-card
           stay-alive
           :team="game.gameSchedule.homeTeam"
-          :isPicked="picks[gameIndex] === '1'"
-          :isGameHasPick="gameIndex in picks"
-          @pick="toggleTeamPick(gameIndex, '1')"
+          :isPicked="picks[game.gameSchedule.gameId] === '1'"
+          :isGameHasPick="game.gameSchedule.gameId in picks"
+          @pick="toggleTeamPick(game.gameSchedule.gameId, '1')"
         ></team-card>
       </li>
     </ul>
@@ -58,7 +58,7 @@
 
     <mu-raised-button
       label="Lock Picks"
-      :disabled="Object.keys(picks).length !== games.length"
+      :disabled="Object.keys(picks).length < games.length"
       v-if="!isPicksLocked"
       @click="showLockPicksModal"
     ></mu-raised-button>
@@ -83,6 +83,8 @@
     computed: {
       ...mapState({
         user: 'user',
+        league: 'league',
+        picks: 'picks',
       }),
     },
     data () {
@@ -93,32 +95,34 @@
         seasonType: null,
         week: null,
         games: [],
-        picks: {},
+        leagueId: '-KzPdROlkcWZDUsd47av',
         shouldShowLockPicksDialog: false,
       }
     },
     watch: {
-      user (val) {
-        if (val) {
-          firebase.database()
-            .ref('picks/user/' + this.user.uid + '/season/' + this.season + '/' + this.seasonType + '/week/' + this.week)
-            .once('value').then(snapshot => {
-              var val = snapshot.val()
-              console.log('watch user - snapshot', val)
-              if (!val) return // it's a new week, or the user has not picked anything yet
-              this.isPicksLocked = val['is-locked']
-              this.picks = val.game || this.picks
-              this.picks.forEach((game, gameIndex) => {
-                this.picks[gameIndex] = this.picks[gameIndex].toString()
-              })
-            })
-        }
+      user () {
+        console.log('watch user :: week, user', this.week, this.user)
+        this.setPicksRef()
       },
     },
     mounted () {
       this.getData()
     },
     methods: {
+      getPicksRef () {
+        return firebase.database().ref(
+          '/leagues/' + this.leagueId +
+          '/users/' + this.user.uid +
+          '/season/' + this.season +
+          '/' + this.seasonType +
+          '/week/' + this.week
+        )
+      },
+      setPicksRef () {
+        if (this.user && this.week) {
+          this.$store.dispatch('setPicksRef', this.getPicksRef())
+        }
+      },
       getData () {
         // get the games
         // https://feeds.nfl.com/feeds-rs/scores.json
@@ -135,31 +139,22 @@
             this.week = json.week
             this.games = json.gameScores
 
+            console.log('getData :: week, user', this.week, this.user)
+            this.setPicksRef()
+
             console.log('parsed json', this.games)
           }).catch(ex => {
             console.log('parsing failed', ex)
           })
       },
-      toggleTeamPick (gameIndex, teamIndex) {
-        if (this.isPicksLocked || !this.user || this.isLoading) return
+      toggleTeamPick (gameId, teamIndex) {
+        if (this.picks.isLocked || !this.user || this.isLoading) return
         this.isLoading = true
-        this.picks[gameIndex] = teamIndex
-        console.log('toggleTeamPick', gameIndex, teamIndex)
-        firebase.database()
-          .ref('picks/user/' + this.user.uid + '/season/' + this.season + '/' + this.seasonType + '/week/' + this.week + '/is-locked')
-          .once('value').then(snapshot => {
-            var val = snapshot.val()
-            console.log('watch user - snapshot', val)
-            if (!val) return // it's a new week, or the user has not picked anything yet
-            this.isPicksLocked = val['is-locked']
-            if (this.isPicksLocked) return
-            firebase.database()
-              .ref('picks/user/' + this.user.uid + '/season/' + this.season + '/' + this.seasonType + '/week/' + this.week + '/game/' + gameIndex)
-              .set(teamIndex)
-              .then(() => {
-                this.isLoading = false
-              })
-          })
+//        this.picks['' + gameId] = teamIndex
+        console.log('toggleTeamPick', gameId, teamIndex)
+        this.getPicksRef().child('' + gameId).set('' + teamIndex).then(() => {
+          this.isLoading = false
+        })
       },
       showLockPicksModal () {
         this.shouldShowLockPicksDialog = true
@@ -168,13 +163,10 @@
         if (!this.user || this.isLoading) return
         this.isPicksLocked = true
         window.scrollTo(0, 0)
-        firebase.database()
-          .ref('picks/user/' + this.user.uid + '/season/' + this.season + '/' + this.seasonType + '/week/' + this.week + '/is-locked')
-          .set(true)
-          .then(() => {
-            this.isLoading = false
-            this.shouldShowLockPicksDialog = false
-          })
+        this.getPicksRef().child('isLocked').set(true).then(() => {
+          this.isLoading = false
+          this.shouldShowLockPicksDialog = false
+        })
       },
     },
   }

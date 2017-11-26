@@ -27,12 +27,12 @@
     name: 'tristate-toggle',
     props: {
       value: Number,
-      gameIndex: Number,
+      gameId: Number,
       isLoading: Boolean,
     },
     methods: {
       change (value) {
-        this.$emit('change', this.gameIndex, value)
+        this.$emit('change', this.gameId, value)
       },
     },
   }
