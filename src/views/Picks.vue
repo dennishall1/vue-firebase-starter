@@ -235,6 +235,20 @@
     .mu-radio
       display: none!important
 
+    .mu-text-field
+      width: 80px
+    .mu-select-field
+      .mu-dropDown-menu
+        height: auto
+        font-size: 50px
+      .mu-dropDown-menu-text
+        color: #00adea
+        height: 37px
+        line-height: 37px
+      .mu-dropDown-menu-icon
+        color: #00adea
+      .mu-text-field-line
+        background: #aaa
 
     @media (max-width: 600px)
       h1
