@@ -7,10 +7,9 @@
       >
         <li
           class="date-header"
+          v-if="!game.isSameTimeAsPreviousGame"
         >
-          {{ game.dayOfWeek }}
-          {{ game.timeOfDay }}
-          {{ game.amOrPm }}
+          {{ game.displayDate }}
         </li>
         <li
           :class="{
@@ -137,6 +136,8 @@
         // https://feeds.nfl.com/feeds-rs/scores.json
         // https://feeds.nfl.com/feeds-rs/schedules.json
         // https://api.apify.com/v1/rs7ntQdHsu4L2g8iA/crawlers/5cCo62Xs7omPRqtNR/lastExec/results?token=icrF4BDXjBePhFcqHFmtd9rf9&format=json&status=SUCCEEDED
+
+        // populate the game Schedules
         /** /
         fetch('https://feeds.nfl.com/feeds-rs/schedules.json')
           .then(res => {
@@ -144,10 +145,11 @@
           }).then(json => {
             // todo: update the data structure to store BY WEEK
             var schedule = json.gameSchedules.reduce((_schedule, item) => {
-              _schedule[item.seasonType].week[item.week] = item
+              _schedule[item.seasonType].week[item.week] = _schedule[item.seasonType].week[item.week] || []
+              _schedule[item.seasonType].week[item.week].push(item)
               return _schedule
-            }, {PRE: {week: {}}, REG: {week: {}}, POST: {week: {}})
-            console.log('schedule', schedule)
+            }, {PRE: {week: {}}, REG: {week: {}}, POST: {week: {}}})
+            // console.log('schedule', schedule)
             firebase.database()
               .ref('schedules/season/' + json.season)
               .set(schedule)
@@ -193,19 +195,25 @@
           .then(response => {
             return response.json()
           }).then(json => {
+            var dayNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']
+            var gameDay
+
             // [0].pageFunctionResult
             this.isLoading = false
             this.season = json.season
             this.seasonType = json.seasonType
             this.week = json.week
             this.games = json.gameScores
+
             this.games.forEach(game => {
-              var dayNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']
               game.dayOfWeek = dayNames[new Date(game.gameSchedule.gameDate).getDay()]
               game.timeOfDay = game.gameSchedule.gameTimeEastern.split(':')
               game.amOrPm = Number(game.timeOfDay[0]) > 11 ? 'pm' : 'am'
               game.timeOfDay[0] = Number(game.timeOfDay[0]) > 12 ? Number(game.timeOfDay[0]) - 12 : game.timeOfDay[0]
               game.timeOfDay = game.timeOfDay.join(':').replace(/:00$/, '')
+              game.displayDate = game.dayOfWeek + ' ' + game.timeOfDay + ' ' + game.amOrPm
+              game.isSameTimeAsPreviousGame = gameDay === game.displayDate
+              gameDay = game.displayDate
               if (game.score && game.score.phase === 'FINAL') {
                 let homeTeamScore = game.score.homeTeamScore.pointTotal
                 let visitorTeamScore = game.score.visitorTeamScore.pointTotal
@@ -240,6 +248,8 @@
     ul
       list-style-type: none
       padding: 0
+      display: inline-flex
+      flex-direction: column
 
     li
       display: flex
@@ -250,7 +260,9 @@
         opacity: .7
         transform: scale(.9)
       &.date-header
-        margin: 0 0 5px
+        margin: 0 0 20px
+        padding: 10px 0
+        border-bottom: 1px solid #aaa
 
     .team-card
       width: 315px

@@ -1,42 +1,49 @@
-<template stay-alive>
+<template>
   <div class="wrapper picks">
 
-    <h1>Picks</h1>
+    <h1>
+      Picks for Week
+      <mu-select-field v-model="week" @change="setWeek">
+        <mu-menu-item
+          v-for="_week in weeks"
+          :key="_week"
+          :value="_week"
+          :title="_week"
+        ></mu-menu-item>
+      </mu-select-field>
+    </h1>
 
     <p v-if="isPicksLocked">
       Your picks are locked in for this week.<br/><br/>
     </p>
 
     <ul v-if="games && games.length">
-      <li v-for="(game, gameIndex) in games">
+      <li v-for="game in games" :key="game.gameId">
         <team-card
-          stay-alive
-          :team="game.gameSchedule.visitorTeam"
-          :isPicked="picks[game.gameSchedule.gameId] === '0'"
-          :isGameHasPick="game.gameSchedule.gameId in picks"
-          @pick="toggleTeamPick(game.gameSchedule.gameId, '0')"
+          :team="game.visitorTeam"
+          :isPicked="picks[game.gameId] === '0'"
+          :isGameHasPick="game.gameId in picks"
+          @pick="toggleTeamPick(game.gameId, '0')"
         ></team-card>
         <mu-radio
-          v-model="picks[game.gameSchedule.gameId]"
+          v-model="picks[game.gameId]"
           nativeValue="0">
         </mu-radio>
         <tristate-toggle
-          stay-alive
-          :value="Number(picks[game.gameSchedule.gameId])"
-          :gameId="game.gameSchedule.gameId"
+          :value="Number(picks[game.gameId])"
+          :gameId="game.gameId"
           :isLoading="isLoading"
           @change="toggleTeamPick"
         ></tristate-toggle>
         <mu-radio
-          v-model="picks[game.gameSchedule.gameId]"
+          v-model="picks[game.gameId]"
           nativeValue="1">
         </mu-radio>
         <team-card
-          stay-alive
-          :team="game.gameSchedule.homeTeam"
-          :isPicked="picks[game.gameSchedule.gameId] === '1'"
-          :isGameHasPick="game.gameSchedule.gameId in picks"
-          @pick="toggleTeamPick(game.gameSchedule.gameId, '1')"
+          :team="game.homeTeam"
+          :isPicked="picks[game.gameId] === '1'"
+          :isGameHasPick="game.gameId in picks"
+          @pick="toggleTeamPick(game.gameId, '1')"
         ></team-card>
       </li>
     </ul>
@@ -70,7 +77,6 @@
   import { mapState } from 'vuex'
   import firebase from 'firebase'
   // import 'whatwg-fetch'
-  import fetch from 'unfetch'
   import TeamCard from '@/components/TeamCard'
   import TristateToggle from '@/components/TristateToggle'
 
@@ -85,16 +91,47 @@
         user: 'user',
         league: 'league',
         picks: 'picks',
+        games: 'games',
       }),
     },
     data () {
+      var date = new Date()
+      var season = date.getFullYear() - (date.getMonth > 2 ? 1 : 0)
+      // var Wednesday = 3
+      // update each year:
+      var preSeasonStartDate = new Date('2017-08-02 EST')
+      var regularSeasonStartDate = new Date('2017-09-06 EST')
+      // var regularSeasonEndDate = new Date(season, 11, 31, 23, 59, 59)
+      var seasonType
+      var week
+      var minWeek
+      var maxWeek
+      var weeks = []
+
+      if (date < regularSeasonStartDate) {
+        seasonType = 'PRE'
+        week = Math.max(0, (date - preSeasonStartDate) / (7 * 24 * 60 * 60 * 1000))
+        minWeek = 0
+        maxWeek = 4
+      } else {
+        seasonType = 'REG'
+        week = Math.min(17, Math.ceil((date - regularSeasonStartDate) / (7 * 24 * 60 * 60 * 1000)))
+        minWeek = 1
+        maxWeek = 17
+      }
+
+      // `[...Array(N).keys()]` .. someday
+      for (var i = minWeek; i <= maxWeek; i++) {
+        weeks.push('' + i)
+      }
+
       return {
         isPicksLocked: false,
         isLoading: true,
-        season: null,
-        seasonType: null,
-        week: null,
-        games: [],
+        season: '' + season,
+        seasonType: seasonType,
+        week: '' + week,
+        weeks: weeks,
         leagueId: '-KzPdROlkcWZDUsd47av',
         shouldShowLockPicksDialog: false,
       }
@@ -106,9 +143,17 @@
       },
     },
     mounted () {
-      this.getData()
+      this.setWeek()
     },
     methods: {
+      setWeek (week) {
+        // console.log(this.week, arguments)
+        this.$store.dispatch('setGamesRef', firebase.database().ref(
+          '/schedules/season/' + this.season +
+          '/' + this.seasonType +
+          '/week/' + (week || this.week)
+        ))
+      },
       getPicksRef () {
         return firebase.database().ref(
           '/leagues/' + this.leagueId +
@@ -122,30 +167,6 @@
         if (this.user && this.week) {
           this.$store.dispatch('setPicksRef', this.getPicksRef())
         }
-      },
-      getData () {
-        // get the games
-        // https://feeds.nfl.com/feeds-rs/scores.json
-        // https://feeds.nfl.com/feeds-rs/schedules.json
-        // https://api.apify.com/v1/rs7ntQdHsu4L2g8iA/crawlers/5cCo62Xs7omPRqtNR/lastExec/results?token=icrF4BDXjBePhFcqHFmtd9rf9&format=json&status=SUCCEEDED
-        fetch('https://feeds.nfl.com/feeds-rs/scores.json')
-          .then(response => {
-            return response.json()
-          }).then(json => {
-            // [0].pageFunctionResult
-            this.isLoading = false
-            this.season = json.season
-            this.seasonType = json.seasonType
-            this.week = json.week
-            this.games = json.gameScores
-
-            console.log('getData :: week, user', this.week, this.user)
-            this.setPicksRef()
-
-            console.log('parsed json', this.games)
-          }).catch(ex => {
-            console.log('parsing failed', ex)
-          })
       },
       toggleTeamPick (gameId, teamIndex) {
         if (this.picks.isLocked || !this.user || this.isLoading) return

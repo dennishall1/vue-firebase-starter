@@ -6,6 +6,7 @@ import Landing from '@/views/Landing'
 import Picks from '@/views/Picks'
 import Login from '@/views/Login'
 import Profile from '@/views/Profile'
+import UpdateScores from '@/views/UpdateScores'
 import Aloha from '@/views/Aloha'
 import FourOhFour from '@/views/FourOhFour'
 
@@ -62,6 +63,10 @@ const router = new Router({
     {
       path: '/aloha',
       component: Aloha,
+    },
+    {
+      path: '/update-scores',
+      component: UpdateScores,
     },
     {
       path: '*',

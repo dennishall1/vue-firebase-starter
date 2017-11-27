@@ -9,6 +9,7 @@ const store = new Vuex.Store({
     user: null,
     league: {},
     picks: {},
+    games: [],
   },
   actions: {
     setLeagueRef: firebaseAction(({ bindFirebaseRef }, ref) => {
@@ -16,6 +17,9 @@ const store = new Vuex.Store({
     }),
     setPicksRef: firebaseAction(({ bindFirebaseRef }, ref) => {
       bindFirebaseRef('picks', ref, {wait: true})
+    }),
+    setGamesRef: firebaseAction(({ bindFirebaseRef }, ref) => {
+      bindFirebaseRef('games', ref, {wait: true})
     }),
   },
   mutations: {
