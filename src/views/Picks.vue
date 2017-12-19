@@ -13,7 +13,7 @@
       </mu-select-field>
     </h1>
 
-    <p v-if="isPicksLocked">
+    <p v-if="picks.isLocked">
       Your picks are locked in for this week.<br/><br/>
     </p>
 
@@ -27,8 +27,8 @@
         ></team-card>
         <mu-radio
           v-model="picks[game.gameId]"
-          nativeValue="0">
-        </mu-radio>
+          nativeValue="0"
+        ></mu-radio>
         <tristate-toggle
           :value="Number(picks[game.gameId])"
           :gameId="game.gameId"
@@ -37,8 +37,8 @@
         ></tristate-toggle>
         <mu-radio
           v-model="picks[game.gameId]"
-          nativeValue="1">
-        </mu-radio>
+          nativeValue="1"
+        ></mu-radio>
         <team-card
           :team="game.homeTeam"
           :isPicked="picks[game.gameId] === '1'"
@@ -66,7 +66,7 @@
     <mu-raised-button
       label="Lock Picks"
       :disabled="Object.keys(picks).length < games.length"
-      v-if="!isPicksLocked"
+      v-if="!picks.isLocked"
       @click="showLockPicksModal"
     ></mu-raised-button>
 
@@ -96,7 +96,8 @@
     },
     data () {
       var date = new Date()
-      var season = date.getFullYear() - (date.getMonth > 2 ? 1 : 0)
+      // if the date is March or earlier, then it is still the previous year's season.
+      var season = date.getFullYear() - (date.getMonth() < 3 ? 1 : 0)
       // var Wednesday = 3
       // update each year:
       var preSeasonStartDate = new Date('2017-08-02 EST')
@@ -126,7 +127,6 @@
       }
 
       return {
-        isPicksLocked: false,
         isLoading: true,
         season: '' + season,
         seasonType: seasonType,
@@ -138,11 +138,20 @@
     },
     watch: {
       user () {
-        console.log('watch user :: week, user', this.week, this.user)
+        console.log('watch user :: week, user', this.week, this.user, this.user.uid)
         this.setPicksRef()
+      },
+      games (val) {
+        console.log('watched games changed', val)
+        this.isLoading = Object.keys(this.picks).length === 0
+      },
+      picks (val) {
+        console.log('watched picks changed', val)
+        this.isLoading = this.games.length === 0
       },
     },
     mounted () {
+      console.log('mounted', 'games', JSON.stringify(this.games), 'picks', JSON.stringify(this.picks))
       this.setWeek()
     },
     methods: {
@@ -153,6 +162,10 @@
           '/' + this.seasonType +
           '/week/' + (week || this.week)
         ))
+        if (week || week === 0) {
+          this.week = '' + week
+        }
+        this.setPicksRef()
       },
       getPicksRef () {
         return firebase.database().ref(
@@ -169,7 +182,9 @@
         }
       },
       toggleTeamPick (gameId, teamIndex) {
-        if (this.picks.isLocked || !this.user || this.isLoading) return
+        if (this.picks.isLocked || !this.user || this.isLoading) {
+          return
+        }
         this.isLoading = true
 //        this.picks['' + gameId] = teamIndex
         console.log('toggleTeamPick', gameId, teamIndex)
@@ -182,7 +197,6 @@
       },
       lockPicks () {
         if (!this.user || this.isLoading) return
-        this.isPicksLocked = true
         window.scrollTo(0, 0)
         this.getPicksRef().child('isLocked').set(true).then(() => {
           this.isLoading = false
@@ -199,7 +213,7 @@
     padding: 20px 20px 90px
 
     h1
-      font-family: bold-cond
+      font-family: bold-cond, sans-serif
       font-size: 50px
 
     h1, h2

@@ -15,7 +15,7 @@
           <team-card
             :team="game.gameSchedule.visitorTeam"
             :isPicked="game.winner === 'visitor'"
-          />
+          ></team-card>
           <span class="score" :data-is-winner="game.winner === 'visitor'">
             {{ game.gameSchedule.visitorTeam.score || '&nbsp; &nbsp;' }}
           </span>
@@ -26,7 +26,7 @@
           <team-card
             :team="game.gameSchedule.homeTeam"
             :isPicked="game.winner === 'home'"
-          />
+          ></team-card>
         </li>
       </template>
     </ul>
@@ -119,7 +119,7 @@
     padding: 20px 20px 90px
 
     h1
-      font-family: bold-cond
+      font-family: bold-cond, sans-serif
       font-size: 50px
 
     h1, h2
