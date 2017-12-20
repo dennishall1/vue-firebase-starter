@@ -12,6 +12,7 @@ Progressive Web App (PWA) starter-kit using vue/vuex/vue(x)-router/offline-plugi
 
 ## Todos
 
+- [ ] Restore Day/Time
 - [ ] Make weeks bookmarkable
 - [ ] Refactor for consistency: Add `seasonType` to the paths `/season/2017/REG/week/12` -> `/season/2017/seasonType/REG/week/12`
 - [ ] Refactor for resiliency: Use team nickname or abbreviation instead of `0` for away team and `1` for home team.

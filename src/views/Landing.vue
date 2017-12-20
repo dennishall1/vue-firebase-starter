@@ -13,13 +13,13 @@
     </h1>
     <ul v-if="picks.isLocked">
       <template
-        v-for="game in games"
+        v-for="(game, gameIndex) in games"
       >
         <li
           class="date-header"
-          v-if="!game.isSameTimeAsPreviousGame"
+          v-if="gameIndex === 0 || game.isoTime !== games[gameIndex - 1].isoTime"
         >
-          {{ game.displayDate }}
+          {{ getDateDisplayForGame(game) }}
         </li>
         <li
           :class="{
@@ -182,6 +182,15 @@
           leagueUser.season[this.season][this.seasonType] &&
           leagueUser.season[this.season][this.seasonType].week[this.week]
         )
+      },
+      getDateDisplayForGame (game) {
+        var dayNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']
+        var dayOfWeek = dayNames[new Date(game.gameDate).getDay()]
+        var timeOfDay = game.gameTimeEastern.split(':')
+        var amOrPm = Number(timeOfDay[0]) > 11 ? 'pm' : 'am'
+        timeOfDay[0] = Number(timeOfDay[0]) > 12 ? Number(timeOfDay[0]) - 12 : timeOfDay[0]
+        timeOfDay = timeOfDay.join(':').replace(/:00$/, '')
+        return dayOfWeek + ' ' + timeOfDay + ' ' + amOrPm
       },
     },
   }
