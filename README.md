@@ -10,6 +10,13 @@
 Progressive Web App (PWA) starter-kit using vue/vuex/vue(x)-router/offline-plugin, with sass, prerendering, muse-ui, and firebase/firebaseui!
 </p>
 
+## Todos
+
+- [ ] Make weeks bookmarkable
+- [ ] Refactor for consistency: Add `seasonType` to the paths `/season/2017/REG/week/12` -> `/season/2017/seasonType/REG/week/12`
+- [ ] Refactor for resiliency: Use team nickname or abbreviation instead of `0` for away team and `1` for home team.
+- [ ] Refactor for reduced db storage and improved code simplicity: <br>&nbsp;&nbsp;&nbsp;&nbsp;
+      Instead of leagues/users/{userId}/season/... Use a datastructure nearly identical to the season, and store a minimal user reference 'under' the game for that week  
 
 
 ## Features

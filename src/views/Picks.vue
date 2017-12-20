@@ -13,8 +13,11 @@
       </mu-select-field>
     </h1>
 
-    <p v-if="picks.isLocked">
-      Your picks are locked in for this week.<br/><br/>
+    <p
+      v-if="picks.isLocked"
+      class="picks__is-locked-message"
+    >
+      Your picks are locked in for this week.
     </p>
 
     <ul v-if="games && games.length">
@@ -220,6 +223,16 @@
       font-weight: normal
       color: white
 
+    &__is-locked-message
+      display: inline-block
+      padding: 20px 50px
+      margin: 0 auto 30px
+      color: #00adea
+      border: 1px solid #00adea
+      animation: pulse 2s linear infinite
+      -webkit-animation: pulse 2s linear infinite
+      -moz-animation: pulse 2s linear infinite
+
     ul
       list-style-type: none
       padding: 0
@@ -263,6 +276,14 @@
         color: #00adea
       .mu-text-field-line
         background: #aaa
+
+    @keyframes pulse
+      0%
+        opacity: .4
+      50%
+        opacity: 1
+      100%
+        opacity: .4
 
     @media (max-width: 600px)
       h1

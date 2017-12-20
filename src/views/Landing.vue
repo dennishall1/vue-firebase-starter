@@ -1,9 +1,19 @@
-<template stay-alive>
+<template>
   <div class="wrapper standings">
-    <h1>Week {{ week }}</h1>
-    <ul v-if="Object.keys(picks).length === games.length">
+    <h1>
+      Week
+      <mu-select-field v-model="week" @change="setWeek">
+        <mu-menu-item
+          v-for="_week in weeks"
+          :key="_week"
+          :value="_week"
+          :title="_week"
+        ></mu-menu-item>
+      </mu-select-field>
+    </h1>
+    <ul v-if="picks.isLocked">
       <template
-        v-for="(game, gameIndex) in games"
+        v-for="game in games"
       >
         <li
           class="date-header"
@@ -13,40 +23,34 @@
         </li>
         <li
           :class="{
-            'is-game-irrelevant': (
-              (
-                Object.keys(leagueUserPicks[getGameKey(gameIndex, 0)] || {}).length === 0 ||
-                Object.keys(leagueUserPicks[getGameKey(gameIndex, 1)] || {}).length === 0
-              ) && (
-                Object.keys(leagueUserPicks[getGameKey(gameIndex, 0)] || {}).length !== 1 &&
-                Object.keys(leagueUserPicks[getGameKey(gameIndex, 1)] || {}).length !== 1
-              )
+            // if everybody picked the same team, the game is irrelevant
+            'is-game-irrelevant': numLeagueUsers === Math.max(
+              (leagueUserPicks[game.gameId] || [[], []])[0].length,
+              (leagueUserPicks[game.gameId] || [[], []])[1].length
             )
           }"
         >
           <team-card
-            stay-alive
-            :team="game.gameSchedule.visitorTeam"
+            :team="game.visitorTeam"
             :isPicked="game.winner === 'visitor'"
-            :usersWhoPickedThisTeam="leagueUserPicks[getGameKey(gameIndex, 0)]"
-          />
+            :usersWhoPickedThisTeam="(leagueUserPicks[game.gameId] || [[], []])[0]"
+          ></team-card>
           <span class="score" :data-is-winner="game.winner === 'visitor'">
-            {{ game.gameSchedule.visitorTeam.score || '&nbsp; &nbsp;' }}
+            {{ game.visitorTeam.score || '&nbsp; &nbsp;' }}
           </span>
           <span style="display: none; width: 10px;">&nbsp;</span>
           <span class="score" :data-is-winner="game.winner === 'home'">
-            {{ game.gameSchedule.homeTeam.score || '&nbsp; &nbsp;' }}
+            {{ game.homeTeam.score || '&nbsp; &nbsp;' }}
           </span>
           <team-card
-            stay-alive
-            :team="game.gameSchedule.homeTeam"
+            :team="game.homeTeam"
             :isPicked="game.winner === 'home'"
-            :usersWhoPickedThisTeam="leagueUserPicks[getGameKey(gameIndex, 1)]"
-          />
+            :usersWhoPickedThisTeam="(leagueUserPicks[game.gameId] || [[], []])[1]"
+          ></team-card>
         </li>
       </template>
     </ul>
-    <div v-if="Object.keys(picks).length === 0" class="must-have-all-picks-notice">
+    <div v-if="!picks.isLocked" class="must-have-all-picks-notice">
       Once you <a href="/picks">make your picks</a> for the week and lock them in,
       you can see your King of Football member picks and standings here.<br/><br/>
       (If you already made your picks and locked them in, you may need to refresh this page.
@@ -58,8 +62,6 @@
 <script>
   import { mapState } from 'vuex'
   import firebase from 'firebase'
-  // import 'whatwg-fetch'
-  import fetch from 'unfetch'
   import TeamCard from '@/components/TeamCard'
 
   export default {
@@ -70,163 +72,116 @@
     computed: {
       ...mapState({
         user: 'user',
+        league: 'league',
+        games: 'games',
       }),
+      picks () {
+        console.log('computing `picks`')
+        return this.leagueUserPicksForThisWeek() || {}
+      },
+      numLeagueUsers () {
+        return Object.keys(this.league.users || {}).length
+      },
+      leagueUserPicks () {
+        var leagueUserPicks = {}
+        var leagueUsers = this.league.users
+        Object.keys(leagueUsers || {}).forEach(userId => {
+          var leagueUserPicksForThisWeek = this.leagueUserPicksForThisWeek(userId)
+          if (leagueUserPicksForThisWeek) {
+            Object.keys(leagueUserPicksForThisWeek || {}).forEach(gameId => {
+              // people who picked the visitor team [], people who picked the home team [].
+              leagueUserPicks[gameId] = leagueUserPicks[gameId] || [[], []]
+              leagueUserPicks[gameId][+leagueUserPicksForThisWeek[gameId]].push({
+                userId: userId,
+                displayName: leagueUsers[userId].displayName,
+              })
+            })
+          }
+        })
+        return leagueUserPicks
+      },
     },
     data () {
+      var date = new Date()
+      var season = date.getFullYear() - (date.getMonth > 2 ? 1 : 0)
+      // var Wednesday = 3
+      // update each year:
+      var preSeasonStartDate = new Date('2017-08-02 EST')
+      var regularSeasonStartDate = new Date('2017-09-06 EST')
+      // var regularSeasonEndDate = new Date(season, 11, 31, 23, 59, 59)
+      var seasonType
+      var week
+      var minWeek
+      var maxWeek
+      var weeks = []
+
+      if (date < regularSeasonStartDate) {
+        seasonType = 'PRE'
+        week = Math.max(0, (date - preSeasonStartDate) / (7 * 24 * 60 * 60 * 1000))
+        minWeek = 0
+        maxWeek = 4
+      } else {
+        seasonType = 'REG'
+        week = Math.min(17, Math.ceil((date - regularSeasonStartDate) / (7 * 24 * 60 * 60 * 1000)))
+        minWeek = 1
+        maxWeek = 17
+      }
+
+      week = '' + week
+
+      // `[...Array(N).keys()]` .. someday
+      for (var i = minWeek; i <= maxWeek; i++) {
+        weeks.push('' + i)
+      }
+
       return {
         isLoading: true,
-        season: null,
-        seasonType: null,
-        week: null,
-        games: [],
-        picks: {},
+        season: season,
+        seasonType: seasonType,
+        week: week,
+        weeks: weeks,
         leagueId: '-KzPdROlkcWZDUsd47av',
-        league: {},
-        leagueUserPicks: {},
       }
     },
     watch: {
-      user (val) {
-        if (val) {
-          // get the user ids for the current league
-          firebase.database()
-            .ref('leagues/' + this.leagueId)
-            .once('value').then(snapshot => {
-              this.league = snapshot.val()
-              this.league.users[this.user.uid].isCurrentUser = true
-              console.log('watch user - league', this.league)
-              Object.keys(this.league.users).forEach(userUid => {
-                firebase.database()
-                  .ref('picks/user/' + userUid + '/season/' + this.season + '/' + this.seasonType + '/week/' + this.week + '/game')
-                  .on('value', snapshot => {
-                    var res = snapshot.val()
-                    if (this.user.uid === userUid) {
-                      console.log('found current user\'s picks')
-                      this.picks = res
-                    }
-                    console.log('watch user - league user picks', res)
-                    res && Object.keys(res).forEach(gameIndex => {
-                      var key = this.getGameKey(gameIndex, res[gameIndex])
-                      this.leagueUserPicks[key] = this.leagueUserPicks[key] || []
-                      this.leagueUserPicks[key].push(this.league.users[userUid])
-                    })
-                  })
-              })
-            })
-        }
+      user () {
+        this.setLeagueRef()
+      },
+      league (val) {
+        console.log('on league updated', val)
+        this.isLoading = false
+      },
+      week (val) {
+        console.log('on week updated', val)
       },
     },
     mounted () {
-      this.getData()
+      this.setWeek()
     },
     methods: {
-      getGameKey (gameIndex, teamIndex) {
-        return [
-          this.season,
-          this.seasonType,
-          this.week,
-          '_',
-          gameIndex,
-          '_',
-          teamIndex,
-        ].join('')
+      setWeek (week) {
+        // console.log(this.week, arguments)
+        this.$store.dispatch('setGamesRef', firebase.database().ref(
+          '/schedules/season/' + this.season +
+          '/' + this.seasonType +
+          '/week/' + (week || this.week)
+        ))
       },
-      getData () {
-        // get the games
-        // https://feeds.nfl.com/feeds-rs/scores.json
-        // https://feeds.nfl.com/feeds-rs/schedules.json
-        // https://api.apify.com/v1/rs7ntQdHsu4L2g8iA/crawlers/5cCo62Xs7omPRqtNR/lastExec/results?token=icrF4BDXjBePhFcqHFmtd9rf9&format=json&status=SUCCEEDED
-
-        // populate the game Schedules
-        /** /
-        fetch('https://feeds.nfl.com/feeds-rs/schedules.json')
-          .then(res => {
-            return res.json()
-          }).then(json => {
-            // todo: update the data structure to store BY WEEK
-            var schedule = json.gameSchedules.reduce((_schedule, item) => {
-              _schedule[item.seasonType].week[item.week] = _schedule[item.seasonType].week[item.week] || []
-              _schedule[item.seasonType].week[item.week].push(item)
-              return _schedule
-            }, {PRE: {week: {}}, REG: {week: {}}, POST: {week: {}}})
-            // console.log('schedule', schedule)
-            firebase.database()
-              .ref('schedules/season/' + json.season)
-              .set(schedule)
-          })
-        /**/
-
-        /** /
-        firebase.database()
-         .ref('leagues/-KzPdROlkcWZDUsd47av/users/aWyGTnMqwQPkeQyEHPqmNWScZ452')
-         .set({
-           displayName: 'Jeremy',
-         })
-        /**/
-
-        /** /
-        firebase.database()
-          .ref('users')
-          .set({
-            '2qi3epBel9aEYOEGD19iUq6vFjG3': { // ges
-              leagues: {
-                '-KzPdROlkcWZDUsd47av': 1,
-              },
-            },
-            'cz4AQCuGGkeuFmY3aV56hzI3xwz2': { // john
-              leagues: {
-                '-KzPdROlkcWZDUsd47av': 1,
-              },
-            },
-            'f4RII3j8j0OM7pAAEiOOXiTnFLY2': {
-              leagues: {
-                '-KzPdROlkcWZDUsd47av': 1,
-              },
-            },
-            'Wi08mzprabaxGzblbkzI77OzyDi1': {
-              leagues: {
-                '-KzPdROlkcWZDUsd47av': 1,
-              },
-            },
-          })
-        /**/
-
-        fetch('https://feeds.nfl.com/feeds-rs/scores.json')
-          .then(response => {
-            return response.json()
-          }).then(json => {
-            var dayNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']
-            var gameDay
-
-            // [0].pageFunctionResult
-            this.isLoading = false
-            this.season = json.season
-            this.seasonType = json.seasonType
-            this.week = json.week
-            this.games = json.gameScores
-
-            this.games.forEach(game => {
-              game.dayOfWeek = dayNames[new Date(game.gameSchedule.gameDate).getDay()]
-              game.timeOfDay = game.gameSchedule.gameTimeEastern.split(':')
-              game.amOrPm = Number(game.timeOfDay[0]) > 11 ? 'pm' : 'am'
-              game.timeOfDay[0] = Number(game.timeOfDay[0]) > 12 ? Number(game.timeOfDay[0]) - 12 : game.timeOfDay[0]
-              game.timeOfDay = game.timeOfDay.join(':').replace(/:00$/, '')
-              game.displayDate = game.dayOfWeek + ' ' + game.timeOfDay + ' ' + game.amOrPm
-              game.isSameTimeAsPreviousGame = gameDay === game.displayDate
-              gameDay = game.displayDate
-              if (game.score && game.score.phase === 'FINAL') {
-                let homeTeamScore = game.score.homeTeamScore.pointTotal
-                let visitorTeamScore = game.score.visitorTeamScore.pointTotal
-                game.gameSchedule.homeTeam.score = homeTeamScore
-                game.gameSchedule.visitorTeam.score = visitorTeamScore
-                game.winner = visitorTeamScore > homeTeamScore ? 'visitor' : 'home'
-              }
-            })
-
-            console.log('parsed json', this.games)
-          }).catch(ex => {
-            console.log('parsing failed', ex)
-          })
+      setLeagueRef () {
+        // console.log(this.week, arguments)
+        this.$store.dispatch('setLeagueRef', firebase.database().ref(
+          '/leagues/' + this.leagueId
+        ))
+      },
+      leagueUserPicksForThisWeek (userId) {
+        var leagueUsers = (this.league || {}).users || {}
+        var leagueUser = leagueUsers[userId || (this.user || {}).uid] || {}
+        return (
+          leagueUser.season &&
+          leagueUser.season[this.season] &&
+          leagueUser.season[this.season][this.seasonType] &&
+          leagueUser.season[this.season][this.seasonType].week[this.week]
+        )
       },
     },
   }
@@ -238,7 +193,7 @@
     padding: 20px 20px 90px
 
     h1
-      font-family: bold-cond
+      font-family: bold-cond, sans-serif
       font-size: 50px
 
     h1, h2
@@ -295,6 +250,21 @@
 
     .must-have-all-picks-notice
       padding-top: 30px
+
+    .mu-text-field
+      width: 80px
+    .mu-select-field
+      .mu-dropDown-menu
+        height: auto
+        font-size: 50px
+      .mu-dropDown-menu-text
+        color: #00adea
+        height: 37px
+        line-height: 37px
+      .mu-dropDown-menu-icon
+        color: #00adea
+      .mu-text-field-line
+        background: #aaa
 
 
     @media (max-width: 600px)
