@@ -16,11 +16,13 @@
         v-for="(game, gameIndex) in sortedGames"
       >
         <li
-          class="date-header"
+          :class="{
+            'date-header': 1,
+            'is-same-day': gameIndex && game.gameDate === sortedGames[gameIndex - 1].gameDate
+          }"
           v-if="gameIndex === 0 || game.isoTime !== sortedGames[gameIndex - 1].isoTime"
-        >
-          {{ getDateDisplayForGame(game) }}
-        </li>
+          v-html="getDateDisplayForGame(game)"
+        ></li>
         <li
           :class="{
             // if everybody picked the same team, the game is irrelevant
@@ -197,7 +199,7 @@
         var amOrPm = Number(timeOfDay[0]) > 11 ? 'pm' : 'am'
         timeOfDay[0] = Number(timeOfDay[0]) > 12 ? Number(timeOfDay[0]) - 12 : timeOfDay[0]
         timeOfDay = timeOfDay.join(':').replace(/:00$/, '')
-        return dayOfWeek + ' ' + timeOfDay + ' ' + amOrPm
+        return '<span class="date-header__day">' + dayOfWeek + '</span> ' + timeOfDay + ' ' + amOrPm
       },
     },
   }
@@ -227,13 +229,20 @@
       margin: 0 0 40px
       justify-content: center
       align-items: flex-start
-      &.is-game-irrelevant
-        opacity: .7
-        transform: scale(.9)
-      &.date-header
-        margin: 0 0 20px
+    .is-game-irrelevant
+      opacity: .7
+      transform: scale(.9)
+    .date-header
+      display: block
+      margin: 0 0 20px
+      &__day
+        display: block
+        margin: 0 0 30px
         padding: 10px 0
         border-bottom: 1px solid #aaa
+      &.is-same-day
+        .date-header__day
+          display: none
 
     .team-card
       width: 315px

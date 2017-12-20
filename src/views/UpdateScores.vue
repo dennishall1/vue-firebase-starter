@@ -1,5 +1,5 @@
 <template stay-alive>
-  <div class="wrapper standings">
+  <div class="wrapper scores">
     <h1>Week {{ week }}</h1>
     <ul>
       <template
@@ -114,7 +114,7 @@
 </script>
 
 <style lang="sass">
-  .standings
+  .scores
     text-align: center
     padding: 20px 20px 90px
 
