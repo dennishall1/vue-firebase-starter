@@ -13,11 +13,11 @@
     </h1>
     <ul v-if="picks.isLocked">
       <template
-        v-for="(game, gameIndex) in games"
+        v-for="(game, gameIndex) in sortedGames"
       >
         <li
           class="date-header"
-          v-if="gameIndex === 0 || game.isoTime !== games[gameIndex - 1].isoTime"
+          v-if="gameIndex === 0 || game.isoTime !== sortedGames[gameIndex - 1].isoTime"
         >
           {{ getDateDisplayForGame(game) }}
         </li>
@@ -75,6 +75,13 @@
         league: 'league',
         games: 'games',
       }),
+      sortedGames () {
+        // javascript `sort` operates in-place
+        this.games.sort((game1, game2) => {
+          return game1.gameId < game2.gameId ? -1 : 1
+        })
+        return this.games
+      },
       picks () {
         console.log('computing `picks`')
         return this.leagueUserPicksForThisWeek() || {}
