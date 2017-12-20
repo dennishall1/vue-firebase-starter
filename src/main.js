@@ -1,7 +1,7 @@
 /* This is the entry point */
 
 // polyfills
-// import 'es6-promise/auto'
+import 'es6-promise/auto'
 import 'weakmap' // for vuexfire, using (imports-loader)
 
 import Vue from 'vue'
