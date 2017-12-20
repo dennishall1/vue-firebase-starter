@@ -98,6 +98,7 @@ var webpackConfig = merge(baseWebpackConfig, {
         ignore: ['.*']
       }
     ]),
+    /** /
     new PrerenderSpaPlugin(
       // Path to compiled app
       path.join(__dirname, '../dist'),
@@ -106,6 +107,7 @@ var webpackConfig = merge(baseWebpackConfig, {
       // then this would be [ '/', '/about', '/contact' ]
       [ '/' ]
     ),
+    /**/
     // it's always better if OfflinePlugin is the last plugin added
     new OfflinePlugin({
       safeToUseOptionalCaches: true,
