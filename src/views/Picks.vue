@@ -21,7 +21,7 @@
     </p>
 
     <ul v-if="games && games.length">
-      <li v-for="game in games" :key="game.gameId">
+      <li v-for="game in sortedGames" :key="game.gameId">
         <team-card
           :team="game.visitorTeam"
           :isPicked="picks[game.gameId] === '0'"
@@ -96,6 +96,13 @@
         picks: 'picks',
         games: 'games',
       }),
+      sortedGames () {
+        // javascript `sort` operates in-place
+        this.games.sort((game1, game2) => {
+          return game1.gameId < game2.gameId ? -1 : 1
+        })
+        return this.games
+      },
     },
     data () {
       var date = new Date()
