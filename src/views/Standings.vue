@@ -198,11 +198,17 @@
           this.timeLastUpdatedScores = now
           setTimeout(() => {
             this.canUpdateScores = !this.isUpdatingScores
+            if (this.canUpdateScores) {
+              location.reload()
+            }
           }, this.minTimeBetweenUpdateScores)
           fetch('/update-scores')
             .then(() => {
               this.isUpdatingScores = false
               this.canUpdateScores = now - this.timeLastUpdatedScores > this.minTimeBetweenUpdateScores
+              if (this.canUpdateScores) {
+                location.reload()
+              }
             })
             .catch(ex => {
               this.isUpdatingScores = false
