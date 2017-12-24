@@ -143,7 +143,8 @@
       league (val) {
         console.log('on league updated', val)
         this.isLoading = this.games.length === 0
-        this.$forceUpdate()
+        // todo: see if this is needed
+        // this.$forceUpdate()
       },
       week (val) {
         console.log('on week updated', val)
@@ -151,7 +152,8 @@
       games (val) {
         console.log('on games updated', val)
         this.isLoading = !this.league.owner
-        this.$forceUpdate()
+        // todo: see if this is needed
+        // this.$forceUpdate()
       },
     },
     mounted () {
@@ -198,19 +200,44 @@
           this.timeLastUpdatedScores = now
           setTimeout(() => {
             this.canUpdateScores = !this.isUpdatingScores
-            if (this.canUpdateScores) {
-              location.reload()
-            }
           }, this.minTimeBetweenUpdateScores)
-          fetch('/update-scores')
-            .then(() => {
+
+          fetch('https://feeds.nfl.com/feeds-rs/scores.json')
+            .then(response => {
+              return response.json()
+            }).then(json => {
+              var weekDb = firebase.database().ref(
+                '/schedules/season/' + json.season +
+                '/' + json.seasonType +
+                '/week/' + json.week
+              )
+              // [0].pageFunctionResult
+              json.gameScores.forEach(game => {
+                // find the matching game in the db and set the score
+                if (game.score && game.score.homeTeamScore) {
+                  weekDb
+                    .orderByChild('gameId')
+                    .equalTo(game.gameSchedule.gameId)
+                    .once('value', snapshot => {
+                      var gameFromDb = snapshot.val()
+                      var key = Object.keys(gameFromDb)[0]
+                      // we have to create a nearly identical updateObject, and can't just use the gameFromDb directly,
+                      // because firebase snapshot val() may 'optimize' objects with numeric keys as if they were arrays
+                      // and introduce nulls -- i.e., key = 1, snapshot val = [null, {game}]
+                      var updateObject = {}
+                      updateObject[key] = gameFromDb[key]
+                      // console.log('gameId', game.gameSchedule.gameId, 'key', key, 'snapshot val', snapshot.val())
+                      updateObject[key].homeTeam.score = game.score.homeTeamScore.pointTotal
+                      updateObject[key].visitorTeam.score = game.score.visitorTeamScore.pointTotal
+                      updateObject[key].phase = game.score.phase
+                      snapshot.ref.update(updateObject)
+                    })
+                }
+              })
+              console.log('parsed json', json.gameScores)
               this.isUpdatingScores = false
               this.canUpdateScores = now - this.timeLastUpdatedScores > this.minTimeBetweenUpdateScores
-              if (this.canUpdateScores) {
-                location.reload()
-              }
-            })
-            .catch(ex => {
+            }).catch(ex => {
               this.isUpdatingScores = false
               this.canUpdateScores = true
               console.log('parsing failed', ex)

@@ -34,7 +34,7 @@
         >
           <team-card
             :team="game.visitorTeam"
-            :isPicked="game.winner === 'visitor'"
+            :isPicked="getWinningTeamOfGame(game) === 'visitor'"
             :usersWhoPickedThisTeam="(leagueUserPicks[game.gameId] || [[], []])[0]"
           ></team-card>
           <span class="score" :data-is-winner="game.winner === 'visitor'">
@@ -46,7 +46,7 @@
           </span>
           <team-card
             :team="game.homeTeam"
-            :isPicked="game.winner === 'home'"
+            :isPicked="getWinningTeamOfGame(game) === 'home'"
             :usersWhoPickedThisTeam="(leagueUserPicks[game.gameId] || [[], []])[1]"
           ></team-card>
         </li>
@@ -168,6 +168,9 @@
       this.setWeek()
     },
     methods: {
+      getWinningTeamOfGame (game) {
+        return game.phase === 'FINAL' ? game.homeTeam.score > game.visitorTeam.score ? 'home' : 'visitor' : null
+      },
       setWeek (week) {
         // console.log(this.week, arguments)
         this.$store.dispatch('setGamesRef', firebase.database().ref(
