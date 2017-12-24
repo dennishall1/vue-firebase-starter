@@ -7,6 +7,11 @@
     </router-link>
 
     <mu-flat-button
+      label="Standings"
+      slot="right"
+      to="standings"
+    />
+    <mu-flat-button
       label="Picks"
       slot="right"
       to="picks"

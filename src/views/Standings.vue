@@ -23,6 +23,21 @@
             {{ user.displayName }}
           </td>
         </tr>
+        <tr>
+          <td colspan="2">
+            Did a game just end?
+            <!-- todo: automate this instead -->
+            <a
+              :class="{
+                'update-scores-link': true,
+                'loading': !this.canUpdateScores,
+              }"
+              @click="updateScores"
+            >
+              Update Scores
+            </a>
+          </td>
+        </tr>
       </tbody>
     </table>
   </div>
@@ -32,6 +47,7 @@
   import { mapState } from 'vuex'
   import firebase from 'firebase'
   import TeamCard from '@/components/TeamCard'
+  import fetch from 'unfetch'
 
   export default {
     name: 'Standings',
@@ -109,6 +125,10 @@
 
       return {
         isLoading: true,
+        isUpdatingScores: false,
+        canUpdateScores: true,
+        timeLastUpdatedScores: 0,
+        minTimeBetweenUpdateScores: 2000,
         season: season,
         seasonType: seasonType,
         week: week,
@@ -171,6 +191,26 @@
         timeOfDay = timeOfDay.join(':').replace(/:00$/, '')
         return '<span class="date-header__day">' + dayOfWeek + '</span> ' + timeOfDay + ' ' + amOrPm
       },
+      updateScores () {
+        var now = Date.now()
+        if (now - this.timeLastUpdatedScores > this.minTimeBetweenUpdateScores) {
+          this.isUpdatingScores = true
+          this.timeLastUpdatedScores = now
+          setTimeout(() => {
+            this.canUpdateScores = !this.isUpdatingScores
+          }, this.minTimeBetweenUpdateScores)
+          fetch('/update-scores')
+            .then(() => {
+              this.isUpdatingScores = false
+              this.canUpdateScores = now - this.timeLastUpdatedScores > this.minTimeBetweenUpdateScores
+            })
+            .catch(ex => {
+              this.isUpdatingScores = false
+              this.canUpdateScores = true
+              console.log('parsing failed', ex)
+            })
+        }
+      },
     },
   }
 </script>
@@ -196,6 +236,34 @@
       text-align: right
       + td
         text-align: left
+
+    .update-scores-link
+      display: inline-block
+      position: relative
+      margin: 0 10px
+      cursor: pointer
+      &.loading
+        color: gray
+        cursor: not-allowed
+
+    @keyframes spinner
+      to
+        transform: rotate(360deg)
+
+    .loading:before
+      content: ''
+      box-sizing: border-box
+      position: absolute
+      top: 50%
+      right: -30px
+      width: 20px
+      height: 20px
+      margin-top: -10px
+      margin-left: -10px
+      border-radius: 50%
+      border: 2px solid #ccc
+      border-top-color: #333
+      animation: spinner .6s linear infinite
 
     .must-have-all-picks-notice
       padding-top: 30px
