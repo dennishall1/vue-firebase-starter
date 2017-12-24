@@ -237,6 +237,12 @@
       + td
         text-align: left
 
+    tr:last-child
+      td
+        padding-top: 40px
+        font-size: 14px
+        text-transform: none
+
     .update-scores-link
       display: inline-block
       position: relative
