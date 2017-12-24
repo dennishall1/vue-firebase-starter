@@ -38,11 +38,11 @@
             :usersWhoPickedThisTeam="(leagueUserPicks[game.gameId] || [[], []])[0]"
           ></team-card>
           <span class="score" :data-is-winner="game.winner === 'visitor'">
-            {{ game.visitorTeam.score || '&nbsp; &nbsp;' }}
+            {{ game.visitorTeam.score }}
           </span>
           <span style="display: none; width: 10px;">&nbsp;</span>
           <span class="score" :data-is-winner="game.winner === 'home'">
-            {{ game.homeTeam.score || '&nbsp; &nbsp;' }}
+            {{ game.homeTeam.score }}
           </span>
           <team-card
             :team="game.homeTeam"
