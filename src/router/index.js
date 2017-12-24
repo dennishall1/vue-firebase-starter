@@ -4,6 +4,7 @@ import firebase from 'firebase'
 import store from '@/store'
 import Landing from '@/views/Landing'
 import Picks from '@/views/Picks'
+import Standings from '@/views/Standings'
 import Login from '@/views/Login'
 import Profile from '@/views/Profile'
 import UpdateScores from '@/views/UpdateScores'
@@ -27,6 +28,13 @@ const router = new Router({
     {
       path: '/picks',
       component: Picks,
+      // meta: {
+      //   requiresAuth: true,
+      // },
+    },
+    {
+      path: '/standings',
+      component: Standings,
       // meta: {
       //   requiresAuth: true,
       // },
