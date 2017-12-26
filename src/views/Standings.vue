@@ -69,7 +69,7 @@
       },
       standings () {
         var leagueUsers = this.league.users
-        console.warn('STANDINGS :: this.game', this.games)
+        // console.log('STANDINGS :: this.games', this.games)
         return Object.keys(leagueUsers || {}).map(userId => {
           var leagueUserPicksForThisWeek = this.leagueUserPicksForThisWeek(userId)
           return {
@@ -128,7 +128,7 @@
         isUpdatingScores: false,
         canUpdateScores: true,
         timeLastUpdatedScores: 0,
-        minTimeBetweenUpdateScores: 2000,
+        minTimeBetweenUpdateScores: 5000,
         season: season,
         seasonType: seasonType,
         week: week,
@@ -141,16 +141,16 @@
         this.setLeagueRef()
       },
       league (val) {
-        console.log('on league updated', val)
+        // console.log('on league updated', val)
         this.isLoading = this.games.length === 0
         // todo: see if this is needed
         // this.$forceUpdate()
       },
-      week (val) {
-        console.log('on week updated', val)
-      },
+      // week (val) {
+      //   console.log('on week updated', val)
+      // },
       games (val) {
-        console.log('on games updated', val)
+        // console.log('on games updated', val)
         this.isLoading = !this.league.owner
         // todo: see if this is needed
         // this.$forceUpdate()
@@ -195,6 +195,7 @@
       },
       updateScores () {
         var now = Date.now()
+        var gameIdsThatNeedTotalYards = []
         if (now - this.timeLastUpdatedScores > this.minTimeBetweenUpdateScores) {
           this.isUpdatingScores = true
           this.timeLastUpdatedScores = now
@@ -205,19 +206,20 @@
           fetch('https://feeds.nfl.com/feeds-rs/scores.json')
             .then(response => {
               return response.json()
-            }).then(json => {
+            })
+            .then(json => {
               var weekDb = firebase.database().ref(
                 '/schedules/season/' + json.season +
                 '/' + json.seasonType +
                 '/week/' + json.week
               )
-              // [0].pageFunctionResult
               json.gameScores.forEach(game => {
                 // find the matching game in the db and set the score
+                var gameId = game.gameSchedule.gameId
                 if (game.score && game.score.homeTeamScore) {
                   weekDb
                     .orderByChild('gameId')
-                    .equalTo(game.gameSchedule.gameId)
+                    .equalTo(gameId)
                     .once('value', snapshot => {
                       var gameFromDb = snapshot.val()
                       var key = Object.keys(gameFromDb)[0]
@@ -230,10 +232,66 @@
                       updateObject[key].homeTeam.score = game.score.homeTeamScore.pointTotal
                       updateObject[key].visitorTeam.score = game.score.visitorTeamScore.pointTotal
                       updateObject[key].phase = game.score.phase
-                      snapshot.ref.update(updateObject)
+                      // if the score is final, get the total yards
+                      if (game.score.phase === 'FINAL') { // && gameFromDb.phase !== 'FINAL'
+                        gameIdsThatNeedTotalYards.push(gameId)
+                        // fetch('https://corsify.appspot.com/http://www.nfl.com/liveupdate/game-center/' + gameId + '/' + gameId + '_gtd.json')
+                      } else {
+                        snapshot.ref.update(updateObject)
+                      }
                     })
                 }
               })
+
+              // process the games that need total yards
+              fetch('https://api.apify.com/v2/acts/dbh~game-stats/runs', {
+                method: 'POST',
+                headers: {
+                  'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ gameIds: gameIdsThatNeedTotalYards }),
+              })
+                .then(r => {
+                  return r.json()
+                })
+                .then(json => {
+                  console.log('apify act response:', json)
+                  // give it a little time to make sure it's there.
+                  setTimeout(() => {
+                    fetch(`https://api.apify.com/v2/key-value-stores/${json.data.defaultKeyValueStoreId}/records/OUTPUT`)
+                      .then(r => {
+                        return r.json()
+                      })
+                      .then(json => {
+                        console.log('apify key value store response:', json)
+                        if (json.error) {
+                          console.error(json.error.message)
+                          return
+                        }
+                        if (typeof json === 'string') {
+                          json = JSON.parse(json)
+                        }
+                        gameIdsThatNeedTotalYards.forEach(gameId => {
+                          weekDb
+                            .orderByChild('gameId')
+                            .equalTo(gameId)
+                            .once('value', snapshot => {
+                              var gameFromDb = snapshot.val()
+                              var key = Object.keys(gameFromDb)[0]
+                              // we have to create a nearly identical updateObject, and can't just use the gameFromDb directly,
+                              // because firebase snapshot val() may 'optimize' objects with numeric keys as if they were arrays
+                              // and introduce nulls -- i.e., key = 1, snapshot val = [null, {game}]
+                              var updateObject = {}
+                              updateObject[key] = gameFromDb[key]
+                              // var stats = json[gameId]
+                              updateObject[key].totalYards = json['' + gameId].home.stats.team.totyds + json['' + gameId].away.stats.team.totyds
+                              snapshot.ref.update(updateObject)
+                            })
+                        })
+                      })
+                  }, 3000)
+                })
+
               console.log('parsed json', json.gameScores)
               this.isUpdatingScores = false
               this.canUpdateScores = now - this.timeLastUpdatedScores > this.minTimeBetweenUpdateScores

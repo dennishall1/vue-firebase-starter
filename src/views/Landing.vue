@@ -26,7 +26,7 @@
         <li
           :class="{
             // if everybody picked the same team, the game is irrelevant
-            'is-game-irrelevant': numLeagueUsers === Math.max(
+            'is-game-irrelevant': false && numLeagueUsers === Math.max(
               (leagueUserPicks[game.gameId] || [[], []])[0].length,
               (leagueUserPicks[game.gameId] || [[], []])[1].length
             )
@@ -37,11 +37,25 @@
             :isPicked="getWinningTeamOfGame(game) === 'visitor'"
             :usersWhoPickedThisTeam="(leagueUserPicks[game.gameId] || [[], []])[0]"
           ></team-card>
-          <span class="score" :data-is-winner="game.winner === 'visitor'">
+          <span
+            class="score"
+            :data-is-winner="game.winner === 'visitor'"
+          >
             {{ game.visitorTeam.score }}
           </span>
-          <span style="display: none; width: 10px;">&nbsp;</span>
-          <span class="score" :data-is-winner="game.winner === 'home'">
+          <span
+            v-if="game.totalYards"
+            class="total-yards"
+            style="position: absolute; margin-top: 81px; color: #999"
+          >
+            {{ game.totalYards }}<span
+              style="text-transform: none; font-size: 75%"
+            >yds</span>
+          </span>
+          <span
+            class="score"
+            :data-is-winner="game.winner === 'home'"
+          >
             {{ game.homeTeam.score }}
           </span>
           <team-card
@@ -234,7 +248,7 @@
       align-items: flex-start
     .is-game-irrelevant
       opacity: .7
-      transform: scale(.9)
+      // transform: scale(.9)
     .date-header
       display: block
       margin: 0 0 20px

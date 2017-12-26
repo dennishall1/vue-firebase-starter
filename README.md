@@ -12,15 +12,22 @@ Progressive Web App (PWA) starter-kit using vue/vuex/vue(x)-router/offline-plugi
 
 ## Todos
 
-- [ ] Make sure to log scores
+// this year miami had a hurricane, so a game was postponed ..  but normally, you can just check if ALL games are 'final'
+
+- [ ] Actually calculate and declare the King of the Week
+- [ ] Log not only the points per week, but also a WEEK POINT - whoever won each week.
+- [ ] Automate scores data imports
 - [ ] Tiebreakers:
       (A) Point spread between the most recent game you lost that is different (according to the list),
       (B) If you made the exact same picks, you have to also pick the total yards gained on the last game of the week
 - [ ] Make weeks bookmarkable
+- [ ] Allow users to set their own displayName
+- [ ] Improve DB security: Only allow users to make picks for their own account 
 - [ ] Refactor for resiliency: Use team nickname or abbreviation instead of `0` for away team and `1` for home team.
 - [ ] Refactor for reduced db storage and improved code simplicity: <br>&nbsp;&nbsp;&nbsp;&nbsp;
       Instead of leagues/users/{userId}/season/... Use a datastructure nearly identical to the season, and store a minimal user reference 'under' the game for that week  
 - [ ] Refactor for consistency: Add `seasonType` to the paths `/season/2017/REG/week/12` -> `/season/2017/seasonType/REG/week/12`
+- [ ] Allow users to delete their account
 
 
 ## Features
