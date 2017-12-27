@@ -49,6 +49,17 @@
           @pick="toggleTeamPick(game.gameId, '1')"
         ></team-card>
       </li>
+      <li stlye="display: none">
+        <div class="field-label">
+          Total net yards
+        </div>
+        <div class="field-input">
+          <input
+            :model="picks.totalYards"
+            @change="setTotalYards"
+          />
+        </div>
+      </li>
     </ul>
 
     <mu-dialog
@@ -59,7 +70,6 @@
         label="No"
         @click="shouldShowLockPicksDialog = false"
       ></mu-raised-button>
-      &nbsp;
       <mu-raised-button
         label="Yes"
         @click="lockPicks"
@@ -190,6 +200,10 @@
         if (this.user && this.week) {
           this.$store.dispatch('setPicksRef', this.getPicksRef())
         }
+      },
+      setTotalYards (event) {
+        console.log(event)
+        this.getPicksRef().child('totalYards').set(event.target.value)
       },
       toggleTeamPick (gameId, teamIndex) {
         if (this.picks.isLocked || !this.user || this.isLoading) {

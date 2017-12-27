@@ -96,6 +96,9 @@
         this.games.sort((game1, game2) => {
           return game1.gameId < game2.gameId ? -1 : 1
         })
+        this.games.sort((game1, game2) => {
+          return game1.isoTime < game2.isoTime ? -1 : 1
+        })
         return this.games
       },
       picks () {

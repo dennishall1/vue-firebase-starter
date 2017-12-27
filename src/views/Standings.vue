@@ -150,7 +150,7 @@
       //   console.log('on week updated', val)
       // },
       games (val) {
-        // console.log('on games updated', val)
+        console.log('on games updated', val)
         this.isLoading = !this.league.owner
         // todo: see if this is needed
         // this.$forceUpdate()
@@ -216,6 +216,30 @@
               json.gameScores.forEach(game => {
                 // find the matching game in the db and set the score
                 var gameId = game.gameSchedule.gameId
+                var gameFromSchedule = this.games.find(game => {
+                  return game.gameId === gameId
+                })
+                if (game.gameSchedule.isoTime !== gameFromSchedule.isoTime) {
+                  weekDb
+                    .orderByChild('gameId')
+                    .equalTo(gameId)
+                    .once('value', snapshot => {
+                      var gameFromDb = snapshot.val()
+                      var key = Object.keys(gameFromDb)[0]
+                      // we have to create a nearly identical updateObject, and can't just use the gameFromDb directly,
+                      // because firebase snapshot val() may 'optimize' objects with numeric keys as if they were arrays
+                      // and introduce nulls -- i.e., key = 1, snapshot val = [null, {game}]
+                      var updateObject = {}
+                      updateObject[key] = gameFromDb[key]
+                      // console.log('gameId', game.gameSchedule.gameId, 'key', key, 'snapshot val', snapshot.val())
+                      updateObject[key].gameDate = game.gameSchedule.gameDate
+                      updateObject[key].gameTimeEastern = game.gameSchedule.gameTimeEastern
+                      updateObject[key].gameTimeLocal = game.gameSchedule.gameTimeLocal
+                      updateObject[key].isoTime = game.gameSchedule.isoTime
+                      snapshot.ref.update(updateObject)
+                    })
+                }
+
                 if (game.score && game.score.homeTeamScore) {
                   weekDb
                     .orderByChild('gameId')
@@ -232,8 +256,8 @@
                       updateObject[key].homeTeam.score = game.score.homeTeamScore.pointTotal
                       updateObject[key].visitorTeam.score = game.score.visitorTeamScore.pointTotal
                       updateObject[key].phase = game.score.phase
-                      // if the score is final, get the total yards
-                      if (game.score.phase === 'FINAL') { // && gameFromDb.phase !== 'FINAL'
+                      // if the score is final, and we don't already have the totalYards, flag this game as needing to get the total yards
+                      if (game.score.phase === 'FINAL' && !gameFromDb.totalYards) {
                         gameIdsThatNeedTotalYards.push(gameId)
                         // fetch('https://corsify.appspot.com/http://www.nfl.com/liveupdate/game-center/' + gameId + '/' + gameId + '_gtd.json')
                       } else {
