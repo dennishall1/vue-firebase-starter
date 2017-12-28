@@ -1,5 +1,5 @@
 <template>
-  <div class="wrapper standings">
+  <div class="wrapper landing">
     <h1>
       Week
       <mu-select-field v-model="week" @change="setWeek">
@@ -115,16 +115,24 @@
       </template>
       <li
         v-if="tieBreakers.length"
+        style="display: block"
       >
         <div>
           Tie breaker total yards
         </div>
-        <div
-          v-for="tieBreaker in tieBreakers"
-          class="tie-breaker"
-        >
-          {{ tieBreaker.displayName }}: {{ tieBreaker.totalYards }}
-        </div>
+        <table>
+          <tr
+            v-for="tieBreaker in tieBreakers"
+            class="tie-breaker"
+          >
+            <td>
+              {{ tieBreaker.displayName }}:
+            </td>
+            <td>
+              {{ tieBreaker.totalYards }}
+            </td>
+          </tr>
+        </table>
       </li>
     </ul>
     <div v-if="!picks.isLocked" class="must-have-all-picks-notice">
@@ -346,7 +354,7 @@
 </script>
 
 <style lang="sass">
-  .standings
+  .landing
     text-align: center
     padding: 20px 20px 90px
 
@@ -443,6 +451,14 @@
         color: white
       .mu-text-field-line
         background: white
+
+    table
+      margin: 10px auto
+    td:first-child
+      text-align: left
+    td:last-child
+      text-align: right
+      padding-left: 10px
 
     @media (max-width: 600px)
       h1
