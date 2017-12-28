@@ -14,7 +14,9 @@
     <div v-if="shouldShowTotalYardsInput">
       <p style="text-transform: none">
         You have the same picks as
-        <span v-for="displayName in usersWithSamePicks">{{ displayName }}</span>.
+        <span>
+          <span v-for="displayName in usersWithSamePicks">{{ displayName }}</span>
+        </span>.
         You must enter your Total Net Yards for the
         {{
           sortedGames[sortedGames.length - 1].visitorTeam.nick + '@' +
@@ -111,6 +113,19 @@
           ></team-card>
         </li>
       </template>
+      <li
+        v-if="tieBreakers.length"
+      >
+        <div>
+          Tie breaker total yards
+        </div>
+        <div
+          v-for="tieBreaker in tieBreakers"
+          class="tie-breaker"
+        >
+          {{ tieBreaker.displayName }}: {{ tieBreaker.totalYards }}
+        </div>
+      </li>
     </ul>
     <div v-if="!picks.isLocked" class="must-have-all-picks-notice">
       Once you <a href="/picks">make your picks</a> for the week and lock them in,
@@ -195,6 +210,17 @@
           }
         })
         return leagueUserPicks
+      },
+      tieBreakers () {
+        return Object.keys(this.league.users).map(userId => {
+          var totalYards = (this.leagueUserPicksForThisWeek(userId) || {}).totalYards
+          return typeof totalYards !== 'undefined' && {
+            displayName: this.league.users[userId].displayName,
+            totalYards: totalYards,
+          }
+        }).filter(item => {
+          return !!item
+        })
       },
     },
     data () {
@@ -300,7 +326,11 @@
         var amOrPm = Number(timeOfDay[0]) > 11 ? 'pm' : 'am'
         timeOfDay[0] = Number(timeOfDay[0]) > 12 ? Number(timeOfDay[0]) - 12 : timeOfDay[0]
         timeOfDay = timeOfDay.join(':').replace(/:00$/, '')
-        return '<span class="date-header__day">' + dayOfWeek + '</span> ' + timeOfDay + ' ' + amOrPm
+        return (
+          '<span class="date-header__day">' + dayOfWeek + '</span> ' +
+          '<span class="date-header__time">' + timeOfDay + '</span>' +
+          '<span class="date-header__am-pm" style="font-size: 75%; opacity: .8">' + amOrPm + '</span>'
+        )
       },
       lockTotalYards () {
         if (!this.user) return
