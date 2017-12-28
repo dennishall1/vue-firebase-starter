@@ -11,7 +11,52 @@
         ></mu-menu-item>
       </mu-select-field>
     </h1>
-    <ul v-if="picks.isLocked">
+    <div v-if="shouldShowTotalYardsInput">
+      <p style="text-transform: none">
+        You have the same picks as
+        <span v-for="displayName in usersWithSamePicks">{{ displayName }}</span>.
+        You must enter your Total Net Yards for the
+        {{
+          sortedGames[sortedGames.length - 1].visitorTeam.nick + '@' +
+          sortedGames[sortedGames.length - 1].homeTeam.nick
+        }}
+        game.
+      </p>
+      <mu-text-field
+        id="totalYardsInput"
+        label="Total Net Yards"
+        v-model="totalYards"
+        :disabled="picks.isTotalYardsLocked"
+        type="number"
+        min="0"
+        required
+        pattern="[1-9][0-9]*"
+      ></mu-text-field>
+      <mu-raised-button
+        label="Lock In Total Yards"
+        :disabled="Object.keys(picks).length < games.length"
+        v-if="!picks.isTotalYardsLocked"
+        @click="shouldShowLockTotalYardsDialog = true"
+      ></mu-raised-button>
+      <br><br><br>
+    </div>
+    <mu-dialog
+      :open="shouldShowLockTotalYardsDialog"
+    >
+      <h3>Are you sure you want to lock in your total yards?</h3>
+      <mu-raised-button
+        label="No"
+        @click="shouldShowLockTotalYardsDialog = false"
+      ></mu-raised-button>
+      <mu-raised-button
+        label="Yes"
+        @click="lockTotalYards"
+      ></mu-raised-button>
+    </mu-dialog>
+    <ul
+      v-if="picks.isLocked"
+      :class="{blur: shouldShowTotalYardsInput}"
+    >
       <template
         v-for="(game, gameIndex) in sortedGames"
       >
@@ -45,7 +90,7 @@
             {{ game.visitorTeam.score }}
           </span>
           <span
-            v-if="game.totalYards"
+            v-if="false && game.totalYards"
             class="total-yards"
             style="position: absolute; margin-top: 81px; color: #999"
           >
@@ -90,8 +135,32 @@
       ...mapState({
         user: 'user',
         league: 'league',
+        picks: 'picks',
         games: 'games',
       }),
+      shouldShowTotalYardsInput () {
+        var shouldShowTotalYardsInput = !this.picks.isTotalYardsLocked && (this.usersWithSamePicks || []).length > 0
+        if (shouldShowTotalYardsInput) {
+          // "autofocus"
+          setTimeout(() => {
+            document.querySelector('input[type="number"]').focus()
+          }, 200)
+        }
+        return shouldShowTotalYardsInput
+      },
+      usersWithSamePicks () {
+        var leagueUsers = this.league.users || {}
+        return leagueUsers && this.picks.isLocked && Object.keys(leagueUsers).filter(leagueUserId => {
+          var leagueUserPicksForThisWeek = this.leagueUserPicksForThisWeek(leagueUserId)
+          return this.user.uid !== leagueUserId && leagueUserPicksForThisWeek && !Object.keys(this.picks).some(prop => {
+            return prop.match(/\.key|totalYards|isTotalYardsLocked/)
+              ? false
+              : this.picks[prop] !== leagueUserPicksForThisWeek[prop]
+          })
+        }).map(leagueUserId => {
+          return leagueUsers[leagueUserId].displayName
+        })
+      },
       sortedGames () {
         // javascript `sort` operates in-place
         this.games.sort((game1, game2) => {
@@ -168,6 +237,8 @@
         week: week,
         weeks: weeks,
         leagueId: '-KzPdROlkcWZDUsd47av',
+        shouldShowLockTotalYardsDialog: false,
+        totalYards: null,
       }
     },
     watch: {
@@ -203,6 +274,15 @@
           '/leagues/' + this.leagueId
         ))
       },
+      getPicksRef () {
+        return firebase.database().ref(
+          '/leagues/' + this.leagueId +
+          '/users/' + this.user.uid +
+          '/season/' + this.season +
+          '/' + this.seasonType +
+          '/week/' + this.week
+        )
+      },
       leagueUserPicksForThisWeek (userId) {
         var leagueUsers = (this.league || {}).users || {}
         var leagueUser = leagueUsers[userId || (this.user || {}).uid] || {}
@@ -221,6 +301,15 @@
         timeOfDay[0] = Number(timeOfDay[0]) > 12 ? Number(timeOfDay[0]) - 12 : timeOfDay[0]
         timeOfDay = timeOfDay.join(':').replace(/:00$/, '')
         return '<span class="date-header__day">' + dayOfWeek + '</span> ' + timeOfDay + ' ' + amOrPm
+      },
+      lockTotalYards () {
+        if (!this.user) return
+        window.scrollTo(0, 0)
+        this.getPicksRef().child('totalYards').set(this.totalYards)
+        this.getPicksRef().child('isTotalYardsLocked').set(true).then(() => {
+          this.isLoading = false
+          this.shouldShowLockTotalYardsDialog = false
+        })
       },
     },
   }
@@ -244,6 +333,8 @@
       padding: 0
       display: inline-flex
       flex-direction: column
+      &.blur
+        display: none
 
     li
       display: flex
@@ -297,21 +388,31 @@
     .must-have-all-picks-notice
       padding-top: 30px
 
-    .mu-text-field
-      width: 80px
-    .mu-select-field
-      .mu-dropDown-menu
-        height: auto
-        font-size: 50px
-      .mu-dropDown-menu-text
-        color: #00adea
-        height: 37px
-        line-height: 37px
-      .mu-dropDown-menu-icon
-        color: #00adea
-      .mu-text-field-line
-        background: #aaa
+    h1
+      .mu-text-field
+        width: 80px
+      .mu-select-field
+        .mu-dropDown-menu
+          height: auto
+          font-size: 50px
+        .mu-dropDown-menu-text
+          color: #00adea
+          height: 37px
+          line-height: 37px
+        .mu-dropDown-menu-icon
+          color: #00adea
+        .mu-text-field-line
+          background: #aaa
 
+    .mu-text-field.has-label
+      width: 140px
+      color: white
+      .mu-text-field-label.float
+        color: rgba(255,255,255,.5)
+      .mu-text-field-input
+        color: white
+      .mu-text-field-line
+        background: white
 
     @media (max-width: 600px)
       h1

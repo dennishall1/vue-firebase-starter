@@ -13,6 +13,36 @@
       </mu-select-field>
     </h1>
 
+    <div v-if="shouldShowTotalYardsInput">
+      <p style="text-transform: none">
+        You have the same picks as
+        <span v-for="displayName in usersWithSamePicks">{{ displayName }}</span>.
+        You must enter your Total Net Yards for the
+        {{
+          sortedGames[sortedGames.length - 1].visitorTeam.nick + '@' +
+          sortedGames[sortedGames.length - 1].homeTeam.nick
+        }}
+        game.
+      </p>
+      <mu-text-field
+        id="totalYardsInput"
+        label="Total Net Yards"
+        v-model="totalYards"
+        :disabled="picks.isTotalYardsLocked"
+        type="number"
+        min="0"
+        required
+        pattern="[1-9][0-9]*"
+      ></mu-text-field>
+      <mu-raised-button
+        label="Lock In Total Yards"
+        :disabled="Object.keys(picks).length < games.length"
+        v-if="!picks.isTotalYardsLocked"
+        @click="shouldShowLockTotalYardsDialog = true"
+      ></mu-raised-button>
+      <br><br><br>
+    </div>
+
     <p
       v-if="picks.isLocked"
       class="picks__is-locked-message"
@@ -21,32 +51,7 @@
     </p>
 
     <ul v-if="games && games.length">
-      <li v-if="false && shouldShowTotalYardsInput">
-        <div>
-          <h3>
-            You have the samek picks as
-            <span v-for="displayName in usersWithSamePicks">{{ displayName }}</span>.
-            You must enter your Total Net Yards
-          </h3>
-          <br/>
-          <mu-text-field
-            id="totalYardsInput"
-            label="Total Net Yards"
-            labelFloat
-            :model="picks.totalYards"
-            :disabled="picks.isTotalYardsLocked"
-            v-on:keypress="onlyAllowNumbers(event)"
-            @change="setTotalYards"
-          ></mu-text-field>
-          <mu-raised-button
-            label="Lock In Total Yards"
-            :disabled="Object.keys(picks).length < games.length"
-            v-if="!picks.isTotalYardsLocked"
-            @click="shouldShowLockTotalYardsDialog = true"
-          ></mu-raised-button>
-        </div>
-      </li>
-      <li v-for="game in sortedGames" :key="game.gameId" :data-id="game.gameId">
+      <li v-for="game in sortedGames" :key="game.gameId" :data-id="game.gameId" :class="{'disabled': picks.isLocked}">
         <team-card
           :team="game.visitorTeam"
           :isPicked="picks[game.gameId] === '0'"
@@ -61,11 +66,13 @@
           :value="Number(picks[game.gameId])"
           :gameId="game.gameId"
           :isLoading="isLoading"
+          :disabled="picks.isLocked"
           @change="toggleTeamPick"
         ></tristate-toggle>
         <mu-radio
           v-model="picks[game.gameId]"
           nativeValue="1"
+          :disabled="picks.isLocked"
         ></mu-radio>
         <team-card
           :team="game.homeTeam"
@@ -73,6 +80,9 @@
           :isGameHasPick="game.gameId in picks"
           @pick="toggleTeamPick(game.gameId, '1')"
         ></team-card>
+      </li>
+      <li v-if="picks.isTotalYardsLocked">
+        Tie-breaker: {{ totalYards }} Total Yards
       </li>
     </ul>
 
@@ -135,13 +145,20 @@
         games: 'games',
       }),
       shouldShowTotalYardsInput () {
-        return (this.usersWithSamePicks || []).length > 0
+        var shouldShowTotalYardsInput = !this.picks.isTotalYardsLocked && (this.usersWithSamePicks || []).length > 0
+        if (shouldShowTotalYardsInput) {
+          // "autofocus"
+          setTimeout(() => {
+            document.querySelector('input[type="number"]').focus()
+          }, 200)
+        }
+        return shouldShowTotalYardsInput
       },
       usersWithSamePicks () {
         var leagueUsers = this.league.users || {}
         return leagueUsers && this.picks.isLocked && Object.keys(leagueUsers).filter(leagueUserId => {
           var leagueUserPicksForThisWeek = this.leagueUserPicksForThisWeek(leagueUserId)
-          return this.user.uid !== leagueUserId && !Object.keys(this.picks).some(prop => {
+          return this.user.uid !== leagueUserId && leagueUserPicksForThisWeek && !Object.keys(this.picks).some(prop => {
             return prop.match(/\.key|totalYards|isTotalYardsLocked/)
               ? false
               : this.picks[prop] !== leagueUserPicksForThisWeek[prop]
@@ -201,6 +218,7 @@
         leagueId: '-KzPdROlkcWZDUsd47av',
         shouldShowLockPicksDialog: false,
         shouldShowLockTotalYardsDialog: false,
+        totalYards: null,
       }
     },
     watch: {
@@ -215,6 +233,9 @@
       },
       picks (val) {
         console.log('watched picks changed', val)
+        if (this.picks.isTotalYardsLocked) {
+          this.totalYards = this.picks.totalYards
+        }
         this.isLoading = this.games.length === 0 || !this.league.users
         // this.$forceUpdate()
       },
@@ -228,11 +249,11 @@
       this.setWeek()
     },
     methods: {
-      onlyAllowNumbers (event) {
-        if (!/\d/.match(String.fromCharCode(event.which || event.keyCode))) {
-          event.preventDefault()
-        }
-      },
+      // onlyAllowNumbers (event) {
+      //   if (!/\d/.match(String.fromCharCode(event.which || event.keyCode))) {
+      //     event.preventDefault()
+      //   }
+      // },
       leagueUserPicksForThisWeek (userId) {
         var leagueUsers = (this.league || {}).users || {}
         var leagueUser = leagueUsers[userId || (this.user || {}).uid] || {}
@@ -275,10 +296,10 @@
           '/leagues/' + this.leagueId
         ))
       },
-      setTotalYards (event) {
-        console.log(event)
-        this.getPicksRef().child('totalYards').set(event.target.value)
-      },
+      // setTotalYards (event) {
+      //   console.log(event)
+      //   this.getPicksRef().child('totalYards').set(event.target.value)
+      // },
       toggleTeamPick (gameId, teamIndex) {
         if (this.picks.isLocked || !this.user || this.isLoading) {
           return
@@ -296,11 +317,13 @@
         this.getPicksRef().child('isLocked').set(true).then(() => {
           this.isLoading = false
           this.shouldShowLockPicksDialog = false
+          window.scrollTo(0, 0)
         })
       },
       lockTotalYards () {
         if (!this.user || this.isLoading) return
         window.scrollTo(0, 0)
+        this.getPicksRef().child('totalYards').set(this.totalYards)
         this.getPicksRef().child('isTotalYardsLocked').set(true).then(() => {
           this.isLoading = false
           this.shouldShowLockTotalYardsDialog = false
@@ -358,6 +381,9 @@
       .team-card
         flex-direction: row
         text-align: left
+    .disabled
+      .team-card
+        cursor: default
 
     .mu-radio
       display: none!important

@@ -3,6 +3,7 @@
     <div
       :class="{
         'tristate-toggle': true,
+        'disabled': disabled,
         'left': value === 0,
         'right': value === 1,
         'loading': isLoading === true
@@ -29,6 +30,7 @@
       value: Number,
       gameId: Number,
       isLoading: Boolean,
+      disabled: Boolean,
     },
     methods: {
       change (value) {
@@ -44,6 +46,7 @@
     background: url(../assets/siteSprite.png) -203px -239px no-repeat
     width: 145px
     padding: 7px
+    user-select: none
 
   .tristate-toggle
     position: relative
@@ -72,4 +75,6 @@
       position: relative
       z-index: 3
       cursor: pointer
+    &.disabled &__button
+      cursor: not-allowed
 </style>
