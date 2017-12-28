@@ -24,6 +24,7 @@
           v-html="getDateDisplayForGame(game)"
         ></li>
         <li
+          :data-id="game.gameId"
           :class="{
             // if everybody picked the same team, the game is irrelevant
             'is-game-irrelevant': false && numLeagueUsers === Math.max(
@@ -94,10 +95,9 @@
       sortedGames () {
         // javascript `sort` operates in-place
         this.games.sort((game1, game2) => {
-          return game1.gameId < game2.gameId ? -1 : 1
-        })
-        this.games.sort((game1, game2) => {
-          return game1.isoTime < game2.isoTime ? -1 : 1
+          return game1.isoTime !== game2.isoTime
+            ? (game1.isoTime < game2.isoTime ? -1 : 1)
+            : (game1.gameId < game2.gameId ? -1 : 1)
         })
         return this.games
       },
@@ -116,6 +116,7 @@
           if (leagueUserPicksForThisWeek) {
             Object.keys(leagueUserPicksForThisWeek || {}).forEach(gameId => {
               // people who picked the visitor team [], people who picked the home team [].
+              if (isNaN(+gameId)) return
               leagueUserPicks[gameId] = leagueUserPicks[gameId] || [[], []]
               leagueUserPicks[gameId][+leagueUserPicksForThisWeek[gameId]].push({
                 userId: userId,

@@ -37,6 +37,4 @@
     letter-spacing: .05em
     color: white
 
-    input
-      color: #444
 </style>

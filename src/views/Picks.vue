@@ -21,7 +21,32 @@
     </p>
 
     <ul v-if="games && games.length">
-      <li v-for="game in sortedGames" :key="game.gameId">
+      <li v-if="false && shouldShowTotalYardsInput">
+        <div>
+          <h3>
+            You have the samek picks as
+            <span v-for="displayName in usersWithSamePicks">{{ displayName }}</span>.
+            You must enter your Total Net Yards
+          </h3>
+          <br/>
+          <mu-text-field
+            id="totalYardsInput"
+            label="Total Net Yards"
+            labelFloat
+            :model="picks.totalYards"
+            :disabled="picks.isTotalYardsLocked"
+            v-on:keypress="onlyAllowNumbers(event)"
+            @change="setTotalYards"
+          ></mu-text-field>
+          <mu-raised-button
+            label="Lock In Total Yards"
+            :disabled="Object.keys(picks).length < games.length"
+            v-if="!picks.isTotalYardsLocked"
+            @click="shouldShowLockTotalYardsDialog = true"
+          ></mu-raised-button>
+        </div>
+      </li>
+      <li v-for="game in sortedGames" :key="game.gameId" :data-id="game.gameId">
         <team-card
           :team="game.visitorTeam"
           :isPicked="picks[game.gameId] === '0'"
@@ -49,18 +74,21 @@
           @pick="toggleTeamPick(game.gameId, '1')"
         ></team-card>
       </li>
-      <li stlye="display: none">
-        <div class="field-label">
-          Total net yards
-        </div>
-        <div class="field-input">
-          <input
-            :model="picks.totalYards"
-            @change="setTotalYards"
-          />
-        </div>
-      </li>
     </ul>
+
+    <mu-dialog
+      :open="shouldShowLockTotalYardsDialog"
+    >
+      <h3>Are you sure you want to lock in your total yards?</h3>
+      <mu-raised-button
+        label="No"
+        @click="shouldShowLockTotalYardsDialog = false"
+      ></mu-raised-button>
+      <mu-raised-button
+        label="Yes"
+        @click="lockTotalYards"
+      ></mu-raised-button>
+    </mu-dialog>
 
     <mu-dialog
       :open="shouldShowLockPicksDialog"
@@ -80,7 +108,7 @@
       label="Lock Picks"
       :disabled="Object.keys(picks).length < games.length"
       v-if="!picks.isLocked"
-      @click="showLockPicksModal"
+      @click="shouldShowLockPicksDialog = true"
     ></mu-raised-button>
 
   </div>
@@ -106,10 +134,28 @@
         picks: 'picks',
         games: 'games',
       }),
+      shouldShowTotalYardsInput () {
+        return (this.usersWithSamePicks || []).length > 0
+      },
+      usersWithSamePicks () {
+        var leagueUsers = this.league.users || {}
+        return leagueUsers && this.picks.isLocked && Object.keys(leagueUsers).filter(leagueUserId => {
+          var leagueUserPicksForThisWeek = this.leagueUserPicksForThisWeek(leagueUserId)
+          return this.user.uid !== leagueUserId && !Object.keys(this.picks).some(prop => {
+            return prop.match(/\.key|totalYards|isTotalYardsLocked/)
+              ? false
+              : this.picks[prop] !== leagueUserPicksForThisWeek[prop]
+          })
+        }).map(leagueUserId => {
+          return leagueUsers[leagueUserId].displayName
+        })
+      },
       sortedGames () {
         // javascript `sort` operates in-place
         this.games.sort((game1, game2) => {
-          return game1.gameId < game2.gameId ? -1 : 1
+          return game1.isoTime !== game2.isoTime
+            ? (game1.isoTime < game2.isoTime ? -1 : 1)
+            : (game1.gameId < game2.gameId ? -1 : 1)
         })
         return this.games
       },
@@ -154,27 +200,49 @@
         weeks: weeks,
         leagueId: '-KzPdROlkcWZDUsd47av',
         shouldShowLockPicksDialog: false,
+        shouldShowLockTotalYardsDialog: false,
       }
     },
     watch: {
       user () {
         console.log('watch user :: week, user', this.week, this.user, this.user.uid)
         this.setPicksRef()
+        this.setLeagueRef()
       },
       games (val) {
         console.log('watched games changed', val)
-        this.isLoading = Object.keys(this.picks).length === 0
+        this.isLoading = Object.keys(this.picks).length === 0 || !this.league.users
       },
       picks (val) {
         console.log('watched picks changed', val)
-        this.isLoading = this.games.length === 0
+        this.isLoading = this.games.length === 0 || !this.league.users
+        // this.$forceUpdate()
+      },
+      league (val) {
+        console.log('watched league changed', val)
+        this.isLoading = this.games.length === 0 || Object.keys(this.picks).length === 0
       },
     },
     mounted () {
-      console.log('mounted', 'games', JSON.stringify(this.games), 'picks', JSON.stringify(this.picks))
+      // console.log('mounted', 'games', this.games, 'picks', this.picks)
       this.setWeek()
     },
     methods: {
+      onlyAllowNumbers (event) {
+        if (!/\d/.match(String.fromCharCode(event.which || event.keyCode))) {
+          event.preventDefault()
+        }
+      },
+      leagueUserPicksForThisWeek (userId) {
+        var leagueUsers = (this.league || {}).users || {}
+        var leagueUser = leagueUsers[userId || (this.user || {}).uid] || {}
+        return (
+          leagueUser.season &&
+          leagueUser.season[this.season] &&
+          leagueUser.season[this.season][this.seasonType] &&
+          leagueUser.season[this.season][this.seasonType].week[this.week]
+        )
+      },
       setWeek (week) {
         // console.log(this.week, arguments)
         this.$store.dispatch('setGamesRef', firebase.database().ref(
@@ -201,6 +269,12 @@
           this.$store.dispatch('setPicksRef', this.getPicksRef())
         }
       },
+      setLeagueRef () {
+        // console.log(this.week, arguments)
+        this.$store.dispatch('setLeagueRef', firebase.database().ref(
+          '/leagues/' + this.leagueId
+        ))
+      },
       setTotalYards (event) {
         console.log(event)
         this.getPicksRef().child('totalYards').set(event.target.value)
@@ -216,15 +290,20 @@
           this.isLoading = false
         })
       },
-      showLockPicksModal () {
-        this.shouldShowLockPicksDialog = true
-      },
       lockPicks () {
         if (!this.user || this.isLoading) return
         window.scrollTo(0, 0)
         this.getPicksRef().child('isLocked').set(true).then(() => {
           this.isLoading = false
           this.shouldShowLockPicksDialog = false
+        })
+      },
+      lockTotalYards () {
+        if (!this.user || this.isLoading) return
+        window.scrollTo(0, 0)
+        this.getPicksRef().child('isTotalYardsLocked').set(true).then(() => {
+          this.isLoading = false
+          this.shouldShowLockTotalYardsDialog = false
         })
       },
     },
@@ -283,20 +362,31 @@
     .mu-radio
       display: none!important
 
-    .mu-text-field
-      width: 80px
-    .mu-select-field
-      .mu-dropDown-menu
-        height: auto
-        font-size: 50px
-      .mu-dropDown-menu-text
-        color: #00adea
-        height: 37px
-        line-height: 37px
-      .mu-dropDown-menu-icon
-        color: #00adea
+    h1
+      .mu-text-field
+        width: 80px
+      .mu-select-field
+        .mu-dropDown-menu
+          height: auto
+          font-size: 50px
+        .mu-dropDown-menu-text
+          color: #00adea
+          height: 37px
+          line-height: 37px
+        .mu-dropDown-menu-icon
+          color: #00adea
+        .mu-text-field-line
+          background: #aaa
+
+    .mu-text-field.has-label
+      width: 140px
+      color: white
+      .mu-text-field-label.float
+        color: rgba(255,255,255,.5)
+      .mu-text-field-input
+        color: white
       .mu-text-field-line
-        background: #aaa
+        background: white
 
     @keyframes pulse
       0%
