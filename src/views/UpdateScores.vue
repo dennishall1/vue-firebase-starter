@@ -64,41 +64,41 @@
     },
     watch: {
       user (val) {
-        if (val) {
+        var _week = '1'
+        if (1 === 0 && val) {
           // get the user ids for the current league
-          fetch('https://feeds.nfl.com/feeds-rs/scores.json')
+          fetch('https://api.apify.com/v1/rs7ntQdHsu4L2g8iA/crawlers/5cCo62Xs7omPRqtNR/lastExec/results?token=icrF4BDXjBePhFcqHFmtd9rf9&format=json&status=SUCCEEDED&r=135')
             .then(response => {
               return response.json()
             }).then(json => {
-              var weekDb = firebase.database().ref(
-                '/schedules/season/' + json.season +
-                '/' + json.seasonType +
-                '/week/' + json.week
-              )
-              // [0].pageFunctionResult
+              var weekDb = firebase.database().ref('/schedules/season/2017/REG/week/' + _week)
               this.isLoading = false
-              this.season = json.season
-              this.seasonType = json.seasonType
-              this.week = json.week
-              this.games = json.gameScores
-              this.games.forEach(game => {
+              this.season = '2017'
+              this.seasonType = 'REG'
+              this.week = _week
+              json[0].pageFunctionResult.forEach(game => {
                 // find the matching game in the db and set the score
-                if (game.score && game.score.homeTeamScore) {
+                console.log('game from json', game.gameId, game)
+                if (game.homeTeamScore) {
                   weekDb
                     .orderByChild('gameId')
-                    .equalTo(game.gameSchedule.gameId)
+                    .equalTo(+game.gameId)
                     .once('value', snapshot => {
                       var gameFromDb = snapshot.val()
                       var key = Object.keys(gameFromDb)[0]
+                      console.log('scores', game.homeTeamScore, game.awayTeamScore)
+                      if (game.homeTeamScore === game.awayTeamScore) {
+                        console.warn('tied game', game.awayName, '@', game.homeName)
+                      }
                       // we have to create a nearly identical updateObject, and can't just use the gameFromDb directly,
                       // because firebase snapshot val() may 'optimize' objects with numeric keys as if they were arrays
                       // and introduce nulls -- i.e., key = 1, snapshot val = [null, {game}]
                       var updateObject = {}
                       updateObject[key] = gameFromDb[key]
                       // console.log('gameId', game.gameSchedule.gameId, 'key', key, 'snapshot val', snapshot.val())
-                      updateObject[key].homeTeam.score = game.score.homeTeamScore.pointTotal
-                      updateObject[key].visitorTeam.score = game.score.visitorTeamScore.pointTotal
-                      updateObject[key].phase = game.score.phase
+                      updateObject[key].homeTeam.score = game.homeTeamScore
+                      updateObject[key].visitorTeam.score = game.awayTeamScore
+                      updateObject[key].phase = 'FINAL'
                       snapshot.ref.update(updateObject)
                     })
                 }

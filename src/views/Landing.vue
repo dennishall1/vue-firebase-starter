@@ -92,15 +92,6 @@
             {{ game.visitorTeam.score }}
           </span>
           <span
-            v-if="false && game.totalYards"
-            class="total-yards"
-            style="position: absolute; margin-top: 81px; color: #999"
-          >
-            {{ game.totalYards }}<span
-              style="text-transform: none; font-size: 75%"
-            >yds</span>
-          </span>
-          <span
             class="score"
             :data-is-winner="game.winner === 'home'"
           >
@@ -123,7 +114,6 @@
         <table>
           <tr
             v-for="tieBreaker in tieBreakers"
-            class="tie-breaker"
           >
             <td>
               {{ tieBreaker.displayName }}:
@@ -131,6 +121,13 @@
             <td>
               {{ tieBreaker.totalYards }}
             </td>
+          </tr>
+          <tr
+            v-if="sortedGames[sortedGames.length - 1].totalYards"
+            class="tie-breakers__actual-yards"
+          >
+            <td>Actual:</td>
+            <td>{{ sortedGames[sortedGames.length - 1].totalYards }}</td>
           </tr>
         </table>
       </li>
@@ -337,7 +334,7 @@
         return (
           '<span class="date-header__day">' + dayOfWeek + '</span> ' +
           '<span class="date-header__time">' + timeOfDay + '</span>' +
-          '<span class="date-header__am-pm" style="font-size: 75%; opacity: .8">' + amOrPm + '</span>'
+          '<span class="date-header__am-pm" style="font-size: 75%; color: #999">' + amOrPm + '</span>'
         )
       },
       lockTotalYards () {
@@ -451,6 +448,9 @@
         color: white
       .mu-text-field-line
         background: white
+
+    .tie-breakers__actual-yards
+      color: #00adea
 
     table
       margin: 10px auto
