@@ -55,6 +55,13 @@
         @click="lockTotalYards"
       ></mu-raised-button>
     </mu-dialog>
+
+    <mu-switch
+      v-model="shouldCollapseIrrelevantGames"
+      label="Show relevant games only"
+    ></mu-switch>
+    <br><br>
+
     <ul
       v-if="picks.isLocked"
       :class="{blur: shouldShowTotalYardsInput}"
@@ -74,7 +81,7 @@
           :data-id="game.gameId"
           :class="{
             // if everybody picked the same team, the game is irrelevant
-            'is-game-irrelevant': false && numLeagueUsers === Math.max(
+            'is-game-irrelevant': shouldCollapseIrrelevantGames && numLeagueUsers === Math.max(
               (leagueUserPicks[game.gameId] || [[], []])[0].length,
               (leagueUserPicks[game.gameId] || [[], []])[1].length
             )
@@ -87,13 +94,13 @@
           ></team-card>
           <span
             class="score"
-            :data-is-winner="game.winner === 'visitor'"
+            :data-is-winner="game.visitorTeam.score > game.homeTeam.score"
           >
             {{ game.visitorTeam.score }}
           </span>
           <span
             class="score"
-            :data-is-winner="game.winner === 'home'"
+            :data-is-winner="game.visitorTeam.score < game.homeTeam.score"
           >
             {{ game.homeTeam.score }}
           </span>
@@ -200,6 +207,7 @@
       leagueUserPicks () {
         var leagueUserPicks = {}
         var leagueUsers = this.league.users
+        var _this = this
         Object.keys(leagueUsers || {}).forEach(userId => {
           var leagueUserPicksForThisWeek = this.leagueUserPicksForThisWeek(userId)
           if (leagueUserPicksForThisWeek) {
@@ -210,6 +218,7 @@
               leagueUserPicks[gameId][+leagueUserPicksForThisWeek[gameId]].push({
                 userId: userId,
                 displayName: leagueUsers[userId].displayName,
+                isCurrentUser: userId === _this.user.uid,
               })
             })
           }
@@ -270,6 +279,7 @@
         leagueId: '-KzPdROlkcWZDUsd47av',
         shouldShowLockTotalYardsDialog: false,
         totalYards: null,
+        shouldCollapseIrrelevantGames: false,
       }
     },
     watch: {
@@ -373,12 +383,17 @@
 
     li
       display: flex
-      margin: 0 0 40px
+      margin: 0
+      padding: 0 0 40px
       justify-content: center
       align-items: flex-start
+      max-height: 200px
+      transition: all .3s
+      overflow: hidden
     .is-game-irrelevant
-      opacity: .7
-      // transform: scale(.9)
+      opacity: 0
+      max-height: 0
+      padding: 0
     .date-header
       display: block
       margin: 0 0 20px
@@ -419,6 +434,7 @@
 
     .score[data-is-winner="true"]
       color: #00adea
+      text-shadow: 0 0 20px #999
 
     .must-have-all-picks-notice
       padding-top: 30px
@@ -438,6 +454,11 @@
           color: #00adea
         .mu-text-field-line
           background: #aaa
+
+    .mu-switch-label
+      color: white
+    .mu-switch-thumb
+      background-color: gray
 
     .mu-text-field.has-label
       width: 140px
@@ -472,10 +493,14 @@
         &.game-has-pick:not(.picked)
           opacity: .7
         &__image
-          width: 100px
+          width: 106px
           height: auto
       .score
-        font-size: 30px
+        font-size: 34px
         padding-top: 55px
+        width: auto
+        min-width: 50px
+        flex-grow: 1000
+        flex-basis: 30%
 
 </style>

@@ -72,15 +72,19 @@ export default {
   .team-card__picked-by-user {
     display: inline-block;
     margin: 5px;
-    color: white;
+    opacity: .7;
     text-transform: none;
   }
   .team-card__picked-by-user--current-user {
-    color: #00adea;
+    opacity: 1;
   }
   @media (max-width: 600px) {
     h3 {
       font-size: 20px;
+    }
+    .team-card__picked-by-user {
+      font-size: 14px;
+      margin: 5px 3px 0;
     }
   }
 </style>
