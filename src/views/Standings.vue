@@ -82,9 +82,9 @@
         return this.leagueUserPicksForThisWeek() || {}
       },
       allScoresAreFinal () {
-        return this.games.length === this.games.reduce((numGamesFinal, game) => {
-          return numGamesFinal + (game.phase === 'FINAL' ? 1 : 0)
-        }, 0)
+        return !this.games.some(game => {
+          return game.phase !== 'FINAL'
+        })
       },
       numLeagueUsers () {
         return Object.keys(this.league.users || {}).length
@@ -105,24 +105,51 @@
         return Object.keys(leagueUsers || {}).map(userId => {
           var leagueUserPicksForThisWeek = this.leagueUserPicksForThisWeek(userId)
           return {
+            userId: userId,
             displayName: leagueUsers[userId].displayName,
+            picks: leagueUserPicksForThisWeek || {},
             totalYards: (leagueUserPicksForThisWeek || {}).totalYards,
             points: Object.keys(leagueUserPicksForThisWeek || {}).reduce((points, gameId) => {
               var game = this.games.find(game => { return '' + game.gameId === '' + gameId })
               // console.log('userId', userId, 'gameId', gameId, 'game', game)
+              if (!game) return points
+              game.winner = '' + Number(game.homeTeam.score > game.visitorTeam.score)
               return points + (
-                game && game.phase === 'FINAL' &&
-                leagueUserPicksForThisWeek[gameId] === '' + Number(game.homeTeam.score > game.visitorTeam.score)
+                game.phase === 'FINAL' &&
+                leagueUserPicksForThisWeek[gameId] === game.winner
                   ? 1
                   : 0
               )
             }, 0),
           }
         }).sort((userA, userB) => {
-          if (actualTotalYards && userA.points === userB.points) {
-            return Math.abs(userA.totalYards - actualTotalYards) < Math.abs(userB.totalYards - actualTotalYards) ? -1 : 1
+          if (userA.points === userB.points) {
+            // users will only have 'totalYards' property if they have the same picks
+            if (actualTotalYards && 'totalYards' in userA && 'totalYards' in userB) {
+              return Math.abs(userA.totalYards - actualTotalYards) < Math.abs(userB.totalYards - actualTotalYards) ? -1 : 1
+            }
+            // (reverse operates in-place, so let's use an old-fashioned loop instead)
+            var userASpread
+            var userBSpread
+            var userAPick
+            var userBPick
+            var game
+            var gameSpread
+            for (var i = this.sortedGames.length - 1; i >= 0; i--) {
+              game = this.sortedGames[i]
+              userAPick = userA.picks[game.gameId]
+              userBPick = userB.picks[game.gameId]
+              if (userAPick !== userBPick) {
+                gameSpread = Math.abs(game.homeTeam.score - game.visitorTeam.score)
+                if (userAPick === game.winner) {
+                  userASpread = gameSpread
+                } else {
+                  userBSpread = gameSpread
+                }
+              }
+            }
+            return userASpread > userBSpread ? -1 : 1
           }
-
           return userA.points > userB.points ? -1 : 1
         })
       },

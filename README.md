@@ -30,7 +30,8 @@ Progressive Web App (PWA) starter-kit using vue/vuex/vue(x)-router/offline-plugi
       Instead of leagues/users/{userId}/season/... Use a datastructure nearly identical to the season, and store a minimal user reference 'under' the game for that week  
 - [ ] Refactor for consistency: Add `seasonType` to the paths `/season/2017/REG/week/12` -> `/season/2017/seasonType/REG/week/12`
 - [ ] Consider to refactor to eliminate `picks` object, instead just use `league`
-- [ ] Refactor to merge the picks and landing pages. 
+- [ ] Refactor to merge the picks and landing pages.
+- [ ] Refactor Standings to reduce db load (only check top two players' spread).
 - [ ] Allow users to delete their account
 - [ ] Email users if they have the exact same picks as someone else
 - [ ] Email users N hours before the first game if they haven't made their picks yet

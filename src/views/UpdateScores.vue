@@ -64,10 +64,10 @@
     },
     watch: {
       user (val) {
-        var _week = '1'
-        if (1 === 0 && val) {
+        var _week = '11'
+        if (0 === 1 && val) {
           // get the user ids for the current league
-          fetch('https://api.apify.com/v1/rs7ntQdHsu4L2g8iA/crawlers/5cCo62Xs7omPRqtNR/lastExec/results?token=icrF4BDXjBePhFcqHFmtd9rf9&format=json&status=SUCCEEDED&r=135')
+          fetch('https://api.apify.com/v1/rs7ntQdHsu4L2g8iA/crawlers/5cCo62Xs7omPRqtNR/lastExec/results?token=icrF4BDXjBePhFcqHFmtd9rf9&format=json&status=SUCCEEDED&r=102')
             .then(response => {
               return response.json()
             }).then(json => {
@@ -79,7 +79,7 @@
               json[0].pageFunctionResult.forEach(game => {
                 // find the matching game in the db and set the score
                 console.log('game from json', game.gameId, game)
-                if (game.homeTeamScore) {
+                if ('homeTeamScore' in game) {
                   weekDb
                     .orderByChild('gameId')
                     .equalTo(+game.gameId)
