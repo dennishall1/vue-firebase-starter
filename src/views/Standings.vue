@@ -30,7 +30,7 @@
           </td>
           <td>
             {{ user.displayName }}
-            <span v-if="typeof user.totalYards !== 'undefined'">
+            <span v-if="0 === 1 && typeof user.totalYards !== 'undefined'">
               <span style="font-size: 75%; color: #999">
                 ({{ user.totalYards }}<span style="font-size: 75%;">yds</span>)
               </span>
