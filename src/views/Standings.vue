@@ -43,6 +43,7 @@
             v-if="week === actualWeek"
           >
             Did a game just end?
+            <!-- todo: don't show this if we already have all the data we need -->
             <!-- todo: automate this instead -->
             <a
               :class="{
@@ -77,10 +78,6 @@
         league: 'league',
         games: 'games',
       }),
-      picks () {
-        console.log('computing `picks`')
-        return this.leagueUserPicksForThisWeek() || {}
-      },
       allScoresAreFinal () {
         return !this.games.some(game => {
           return game.phase !== 'FINAL'
@@ -101,7 +98,8 @@
       standings () {
         var leagueUsers = this.league.users
         var actualTotalYards = (this.sortedGames[this.sortedGames.length - 1] || {}).totalYards
-        // console.log('STANDINGS :: this.games', this.games)
+        // console.log('STANDINGS :: this.league.users', Object.keys(this.league.users || {}))
+        // console.log('STANDINGS :: this.games', JSON.stringify(this.games || ''))
         return Object.keys(leagueUsers || {}).map(userId => {
           var leagueUserPicksForThisWeek = this.leagueUserPicksForThisWeek(userId)
           return {
@@ -111,7 +109,7 @@
             totalYards: (leagueUserPicksForThisWeek || {}).totalYards,
             points: Object.keys(leagueUserPicksForThisWeek || {}).reduce((points, gameId) => {
               var game = this.games.find(game => { return '' + game.gameId === '' + gameId })
-              // console.log('userId', userId, 'gameId', gameId, 'game', game)
+              // console.log('userId', userId, 'gameId', gameId, 'game', game, game && (game.homeTeam.score + ', ' + game.visitorTeam.score))
               if (!game) return points
               game.winner = '' + Number(game.homeTeam.score > game.visitorTeam.score)
               return points + (
@@ -156,7 +154,8 @@
     },
     data () {
       var date = new Date()
-      var season = date.getFullYear() - (date.getMonth > 2 ? 1 : 0)
+      // if the date is March or earlier, then it is still the previous year's season.
+      var season = date.getFullYear() - (date.getMonth() < 3 ? 1 : 0)
       // var Wednesday = 3
       // update each year:
       var preSeasonStartDate = new Date('2017-08-02 EST')
@@ -207,18 +206,14 @@
       },
       league (val) {
         // console.log('on league updated', val)
-        this.isLoading = this.games.length === 0
-        // todo: see if this is needed
-        // this.$forceUpdate()
+        this.isLoading = this.games.length === 0 && this.league.users
       },
       // week (val) {
       //   console.log('on week updated', val)
       // },
       games (val) {
-        console.log('on games updated', val)
-        this.isLoading = !this.league.owner
-        // todo: see if this is needed
-        // this.$forceUpdate()
+        // console.log('on games updated', this.week, typeof this.week, this.league.users, val)
+        this.isLoading = this.games.length === 0 && this.league.users
       },
     },
     mounted () {
@@ -227,14 +222,14 @@
     methods: {
       setWeek (week) {
         // console.log(this.week, arguments)
-        this.$store.dispatch('setGamesRef', firebase.database().ref(
-          '/schedules/season/' + this.season +
-          '/' + this.seasonType +
-          '/week/' + (week || this.week)
-        ))
         if (week || week === 0) {
           this.week = '' + week
         }
+        this.$store.dispatch('setGamesRef', firebase.database().ref(
+          '/schedules/season/' + this.season +
+          '/' + this.seasonType +
+          '/week/' + this.week
+        ))
       },
       setLeagueRef () {
         // console.log(this.week, arguments)
@@ -262,6 +257,7 @@
         return '<span class="date-header__day">' + dayOfWeek + '</span> ' + timeOfDay + ' ' + amOrPm
       },
       updateScores () {
+        var _this = this
         var now = Date.now()
         var gameIdsThatNeedTotalYards = []
         if (now - this.timeLastUpdatedScores > this.minTimeBetweenUpdateScores) {
@@ -276,6 +272,8 @@
               return response.json()
             })
             .then(json => {
+              var numGamesProcessed = 0
+              var numGames = json.gameScores.length
               var weekDb = firebase.database().ref(
                 '/schedules/season/' + json.season +
                 '/' + json.seasonType +
@@ -285,10 +283,10 @@
                 // find the matching game in the db and set the score
                 var gameId = game.gameSchedule.gameId
                 var gameFromSchedule = this.games.find(game => {
-                  return game.gameId === gameId
+                  return '' + game.gameId === '' + gameId
                 })
-                console.log(gameId, 'gameFromSchedule', gameFromSchedule)
-                if (game.gameSchedule.isoTime !== gameFromSchedule.isoTime) {
+                console.log(gameId, 'gameFromSchedule', gameFromSchedule, game)
+                if (gameFromSchedule && game.gameSchedule.isoTime !== gameFromSchedule.isoTime) {
                   weekDb
                     .orderByChild('gameId')
                     .equalTo(gameId)
@@ -325,72 +323,90 @@
                       updateObject[key].homeTeam.score = game.score.homeTeamScore.pointTotal
                       updateObject[key].visitorTeam.score = game.score.visitorTeamScore.pointTotal
                       updateObject[key].phase = game.score.phase
+                      snapshot.ref.update(updateObject)
                       // if the score is final, and we don't already have the totalYards, flag this game as needing to get the total yards
+                      console.log('totalYards ?', gameId, game.score.phase, gameFromDb.totalYards, game.score.phase === 'FINAL', !gameFromDb.totalYards)
                       if (game.score.phase === 'FINAL' && !gameFromDb.totalYards) {
                         gameIdsThatNeedTotalYards.push(gameId)
                         // fetch('https://corsify.appspot.com/http://www.nfl.com/liveupdate/game-center/' + gameId + '/' + gameId + '_gtd.json')
-                      } else {
-                        snapshot.ref.update(updateObject)
                       }
+                      numGamesProcessed++
                     })
+                } else {
+                  numGamesProcessed++
                 }
               })
 
-              // process the games that need total yards
-              fetch('https://api.apify.com/v2/acts/dbh~game-stats/runs', {
-                method: 'POST',
-                headers: {
-                  'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ gameIds: gameIdsThatNeedTotalYards }),
-              })
-                .then(r => {
-                  return r.json()
-                })
-                .then(json => {
-                  console.log('apify act response:', json)
-                  // give it a little time to make sure it's there.
-                  setTimeout(() => {
-                    fetch(`https://api.apify.com/v2/key-value-stores/${json.data.defaultKeyValueStoreId}/records/OUTPUT`)
-                      .then(r => {
-                        return r.json()
-                      })
-                      .then(json => {
-                        console.log('apify key value store response:', json)
-                        if (json.error) {
-                          console.error(json.error.message)
-                          return
-                        }
-                        if (typeof json === 'string') {
-                          json = JSON.parse(json)
-                        }
-                        gameIdsThatNeedTotalYards.forEach(gameId => {
-                          weekDb
-                            .orderByChild('gameId')
-                            .equalTo(gameId)
-                            .once('value', snapshot => {
-                              var gameFromDb = snapshot.val()
-                              var key = Object.keys(gameFromDb)[0]
-                              // we have to create a nearly identical updateObject, and can't just use the gameFromDb directly,
-                              // because firebase snapshot val() may 'optimize' objects with numeric keys as if they were arrays
-                              // and introduce nulls -- i.e., key = 1, snapshot val = [null, {game}]
-                              var updateObject = {}
-                              updateObject[key] = gameFromDb[key]
-                              // var stats = json[gameId]
-                              updateObject[key].totalYards = json['' + gameId].home.stats.team.totyds + json['' + gameId].away.stats.team.totyds
-                              snapshot.ref.update(updateObject)
+              var _start = Date.now()
+              console.log('start waiting for all games to have evaluation of whether they need totalYards', new Date())
+              // update the total yards
+              function updateYards () {
+                if (numGamesProcessed !== numGames) {
+                  setTimeout(updateYards, 300)
+                }
+                console.log('done waiting .. ', Date.now() - _start, new Date())
+                if (gameIdsThatNeedTotalYards.length) {
+                  // process the games that need total yards
+                  fetch('https://api.apify.com/v2/acts/dbh~game-stats/runs', {
+                    method: 'POST',
+                    headers: {
+                      'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({gameIds: gameIdsThatNeedTotalYards}),
+                  })
+                    .then(r => {
+                      return r.json()
+                    })
+                    .then(json => {
+                      console.log('apify act response:', json)
+                      // give it a little time to make sure it's there.
+                      setTimeout(() => {
+                        fetch(`https://api.apify.com/v2/key-value-stores/${json.data.defaultKeyValueStoreId}/records/OUTPUT`)
+                          .then(r => {
+                            return r.json()
+                          })
+                          .then(json => {
+                            console.log('apify key value store response:', json)
+                            if (json.error) {
+                              console.error(json.error.message)
+                              return
+                            }
+                            if (typeof json === 'string') {
+                              json = JSON.parse(json)
+                            }
+                            gameIdsThatNeedTotalYards.forEach(gameId => {
+                              weekDb
+                                .orderByChild('gameId')
+                                .equalTo(gameId)
+                                .once('value', snapshot => {
+                                  var gameFromDb = snapshot.val()
+                                  var key = Object.keys(gameFromDb)[0]
+                                  // we have to create a nearly identical updateObject, and can't just use the gameFromDb directly,
+                                  // because firebase snapshot val() may 'optimize' objects with numeric keys as if they were arrays
+                                  // and introduce nulls -- i.e., key = 1, snapshot val = [null, {game}]
+                                  var updateObject = {}
+                                  updateObject[key] = gameFromDb[key]
+                                  // var stats = json[gameId]
+                                  updateObject[key].totalYards = json['' + gameId].home.stats.team.totyds + json['' + gameId].away.stats.team.totyds
+                                  snapshot.ref.update(updateObject)
+                                })
                             })
-                        })
-                      })
-                  }, 3000)
-                })
+                            _this.isUpdatingScores = false
+                            _this.canUpdateScores = now - this.timeLastUpdatedScores > this.minTimeBetweenUpdateScores
+                          })
+                      }, 5000)
+                    })
+                } else {
+                  _this.isUpdatingScores = false
+                  _this.canUpdateScores = now - this.timeLastUpdatedScores > this.minTimeBetweenUpdateScores
+                }
+              }
+              updateYards()
 
               console.log('parsed json', json.gameScores)
-              this.isUpdatingScores = false
-              this.canUpdateScores = now - this.timeLastUpdatedScores > this.minTimeBetweenUpdateScores
             }).catch(ex => {
-              this.isUpdatingScores = false
-              this.canUpdateScores = true
+              _this.isUpdatingScores = false
+              _this.canUpdateScores = true
               console.log('parsing failed', ex)
             })
         }

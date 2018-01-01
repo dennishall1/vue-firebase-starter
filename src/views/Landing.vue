@@ -239,7 +239,8 @@
     },
     data () {
       var date = new Date()
-      var season = date.getFullYear() - (date.getMonth > 2 ? 1 : 0)
+      // if the date is March or earlier, then it is still the previous year's season.
+      var season = date.getFullYear() - (date.getMonth() < 3 ? 1 : 0)
       // var Wednesday = 3
       // update each year:
       var preSeasonStartDate = new Date('2017-08-02 EST')
