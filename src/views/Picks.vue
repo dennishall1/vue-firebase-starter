@@ -206,7 +206,7 @@
         if (week > maxWeek) {
           seasonType = 'POST'
           minWeek = maxWeek + 1
-          maxWeek = maxWeek + 4
+          maxWeek = maxWeek + 5
           week = Math.min(week, maxWeek)
         }
       }

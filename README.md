@@ -14,10 +14,11 @@ Progressive Web App (PWA) starter-kit using vue/vuex/vue(x)-router/offline-plugi
 
 // this year miami had a hurricane, so a game was postponed ..  but normally, you can just check if all games for a given week are 'final'
 
-- [ ] Actually calculate and declare the King of the Week
+- [*] Actually calculate and declare the King of the Week (pretty much done)
 - [ ] Account for tied football games (half point each)
 - [ ] Log not only the points per week, but also a WEEK POINT - whoever won each week.
-- [ ] Automate scores data imports
+- [ ] Consider the POST season as a single week.
+- [ ] Automate scores data imports (getting there)
 - [ ] Enforce cut-off time for making picks - before the first game starts (and also server-side) -- including perhaps a different cutoff time for the total yards
 - [ ] Tiebreakers:
       (A) Point spread between the most recent game you lost that is different (according to the list),
@@ -35,7 +36,7 @@ Progressive Web App (PWA) starter-kit using vue/vuex/vue(x)-router/offline-plugi
 - [ ] Allow users to delete their account
 - [ ] Email users if they have the exact same picks as someone else
 - [ ] Email users N hours before the first game if they haven't made their picks yet
-
+- [ ] Email users N hours after the last game to inform them who won for the week
 
 ## Features
 

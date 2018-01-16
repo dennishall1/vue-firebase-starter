@@ -65,6 +65,7 @@ function pageFunction () {
           delete game.homeAbbr;
           delete game.homeName;
           delete game.homeMascot;
+          delete game.homeCityName;
           game.visitorTeam = game.visitorTeam || {};
           game.visitorTeam.abbr = game.awayAbbr;
           game.visitorTeam.nick = game.awayName;
@@ -72,6 +73,7 @@ function pageFunction () {
           delete game.awayAbbr;
           delete game.awayName;
           delete game.awayMascot;
+          delete game.awayCityName;
 
           results.push(game);
           game = {};
@@ -688,6 +690,8 @@ function pageFunction () {
     ];
     var team = teams.find(function(team){
       return team.nick === teamObj.nick;
+    }) || teams.find(function(team){
+      return team.abbr === teamObj.abbr;
     });
 
     if(!team){
