@@ -87,4 +87,8 @@ export default {
       display: block
       width: 35px
       height: 35px
+  @media (max-width: 600px)
+    .mu-flat-button-label
+      padding-left: 10px
+      padding-right: 10px
 </style>
