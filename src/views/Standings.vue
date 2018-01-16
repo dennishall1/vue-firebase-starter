@@ -197,7 +197,7 @@
         isUpdatingScores: false,
         canUpdateScores: true,
         timeLastUpdatedScores: 0,
-        minTimeBetweenUpdateScores: 5000,
+        minTimeBetweenUpdateScores: 9900,
         season: season,
         seasonType: seasonType,
         actualWeek: week,
@@ -268,9 +268,11 @@
         var gameIdsThatNeedTotalYards = []
         if (now - this.timeLastUpdatedScores > this.minTimeBetweenUpdateScores) {
           this.isUpdatingScores = true
+          this.canUpdateScores = false
           this.timeLastUpdatedScores = now
+          this.$forceUpdate()
           setTimeout(() => {
-            this.canUpdateScores = !this.isUpdatingScores
+            _this.canUpdateScores = _this.canUpdateScores || !_this.isUpdatingScores
           }, this.minTimeBetweenUpdateScores)
 
           fetch('https://feeds.nfl.com/feeds-rs/scores.json')
@@ -398,13 +400,25 @@
                                 })
                             })
                             _this.isUpdatingScores = false
-                            _this.canUpdateScores = now - this.timeLastUpdatedScores > this.minTimeBetweenUpdateScores
+                            _this.canUpdateScores = Date.now() - _this.timeLastUpdatedScores > _this.minTimeBetweenUpdateScores
+                            console.log('can update scores?', _this.canUpdateScores, Date.now() - _this.timeLastUpdatedScores, _this.minTimeBetweenUpdateScores)
+                            if (!_this.canUpdateScores) {
+                              setTimeout(() => {
+                                _this.canUpdateScores = true
+                                console.log('can update scores?', _this.canUpdateScores)
+                              }, _this.minTimeBetweenUpdateScores - Date.now() - _this.timeLastUpdatedScores)
+                            }
                           })
                       }, 5000)
                     })
                 } else {
                   _this.isUpdatingScores = false
-                  _this.canUpdateScores = now - this.timeLastUpdatedScores > this.minTimeBetweenUpdateScores
+                  _this.canUpdateScores = Date.now() - _this.timeLastUpdatedScores > _this.minTimeBetweenUpdateScores
+                  if (!_this.canUpdateScores) {
+                    setTimeout(() => {
+                      _this.canUpdateScores = true
+                    }, _this.minTimeBetweenUpdateScores - Date.now() - _this.timeLastUpdatedScores)
+                  }
                 }
               }
               updateYards()
