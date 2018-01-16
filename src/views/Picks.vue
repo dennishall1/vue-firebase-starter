@@ -449,6 +449,9 @@
       .mu-radio
         display: inline-block!important
         margin: 5px
+        &.disabled
+          .mu-radio-icon-checked
+            color: #00adea
 
       .tristate-toggle-wrapper
         display: none
