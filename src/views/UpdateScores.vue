@@ -79,16 +79,16 @@
               json[0].pageFunctionResult.forEach(game => {
                 // find the matching game in the db and set the score
                 console.log('game from json', game.gameId, game)
-                if ('homeTeamScore' in game) {
+                if ('score' in game.homeTeam) {
                   weekDb
                     .orderByChild('gameId')
                     .equalTo(+game.gameId)
                     .once('value', snapshot => {
                       var gameFromDb = snapshot.val()
                       var key = Object.keys(gameFromDb)[0]
-                      console.log('scores', game.homeTeamScore, game.awayTeamScore)
-                      if (game.homeTeamScore === game.awayTeamScore) {
-                        console.warn('tied game', game.awayName, '@', game.homeName)
+                      console.log('scores', game.homeTeam.score, game.visitorTeam.score)
+                      if (game.homeTeam.score === game.visitorTeam.score) {
+                        console.warn('tied game', game.visitorTeam.nick, '@', game.homeTeam.nick)
                       }
                       // we have to create a nearly identical updateObject, and can't just use the gameFromDb directly,
                       // because firebase snapshot val() may 'optimize' objects with numeric keys as if they were arrays
@@ -96,13 +96,62 @@
                       var updateObject = {}
                       updateObject[key] = gameFromDb[key]
                       // console.log('gameId', game.gameSchedule.gameId, 'key', key, 'snapshot val', snapshot.val())
-                      updateObject[key].homeTeam.score = game.homeTeamScore
-                      updateObject[key].visitorTeam.score = game.awayTeamScore
+                      updateObject[key].homeTeam.score = game.homeTeam.score
+                      updateObject[key].visitorTeam.score = game.visitorTeam.score
                       updateObject[key].phase = 'FINAL'
                       snapshot.ref.update(updateObject)
                     })
                 }
               })
+              console.log('parsed json', this.games)
+            }).catch(ex => {
+              console.log('parsing failed', ex)
+            })
+        }
+
+        var date = new Date()
+        // if the date is March or earlier, then it is still the previous year's season.
+        var season = date.getFullYear() - (date.getMonth() < 3 ? 1 : 0)
+        var preSeasonStartDate = new Date('2017-08-02 EST')
+        var regularSeasonStartDate = new Date('2017-09-06 EST')
+        // var regularSeasonEndDate = new Date(season, 11, 31, 23, 59, 59)
+        var seasonType
+        var week
+        var maxWeek
+
+        if (date < regularSeasonStartDate) {
+          seasonType = 'PRE'
+          week = Math.max(0, (date - preSeasonStartDate) / (7 * 24 * 60 * 60 * 1000))
+          maxWeek = 4
+        } else {
+          seasonType = 'REG'
+          week = Math.ceil((date - regularSeasonStartDate) / (7 * 24 * 60 * 60 * 1000))
+          maxWeek = 17
+          if (week > maxWeek) {
+            seasonType = 'POST'
+            maxWeek = maxWeek + 4
+            week = Math.min(week, maxWeek)
+          }
+        }
+        week = '' + week
+        if (seasonType === 'POST') {
+          fetch('https://api.apify.com/v1/rs7ntQdHsu4L2g8iA/crawlers/5cCo62Xs7omPRqtNR/lastExec/results?token=icrF4BDXjBePhFcqHFmtd9rf9&format=json&status=SUCCEEDED')
+            .then(response => {
+              return response.json()
+            }).then(json => {
+              this.isLoading = false
+              this.season = season
+              this.seasonType = seasonType
+              this.week = _week
+              var updateObj = {}
+              json[0].pageFunctionResult.forEach(game => {
+                var week = '' + Math.ceil((new Date(game.isoTime) - regularSeasonStartDate) / (7 * 24 * 60 * 60 * 1000))
+                // find the matching game in the db and set the score
+                console.log('game from json', 'week', week, 'gameId', game.gameId, 'game', game)
+                updateObj[week] = updateObj[week] || []
+                updateObj[week].push(game)
+              })
+              firebase.database().ref(`/schedules/season/${season}/POST/week/`).set(updateObj)
               console.log('parsed json', this.games)
             }).catch(ex => {
               console.log('parsing failed', ex)

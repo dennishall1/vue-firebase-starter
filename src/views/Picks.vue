@@ -199,9 +199,15 @@
         maxWeek = 4
       } else {
         seasonType = 'REG'
-        week = Math.min(17, Math.ceil((date - regularSeasonStartDate) / (7 * 24 * 60 * 60 * 1000)))
+        week = Math.ceil((date - regularSeasonStartDate) / (7 * 24 * 60 * 60 * 1000))
         minWeek = 1
         maxWeek = 17
+        if (week > maxWeek) {
+          seasonType = 'POST'
+          minWeek = maxWeek + 1
+          maxWeek = maxWeek + 4
+          week = Math.min(week, maxWeek)
+        }
       }
 
       // `[...Array(N).keys()]` .. someday
