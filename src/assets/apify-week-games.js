@@ -48,7 +48,7 @@ function pageFunction () {
           game.gameId = +game.gameId;
           game.isoTime = (new Date(year, month, day, hour, minute)).getTime();
           // "12/31/2017";
-          game.gameDate = [month, day, year].join('/');
+          game.gameDate = [pad(month + 1), pad(day), year].join('/');
           // "16:25:00"
           game.gameTimeEastern = [pad(hour), pad(minute), '00'].join(':');
           delete game.game; // useless java object reference

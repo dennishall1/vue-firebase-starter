@@ -18,7 +18,7 @@
       </h3>
       <img
         class="team-card__image"
-        :src="'http://i.nflcdn.com/static/site/7.5/img/logos/svg/teams-matte-mascot/' + team.nick.toLowerCase() + '.svg'"
+        :src="'http://i.nflcdn.com/static/site/7.5/img/logos/svg/teams-matte-mascot/' + (/pro bowl/i.test(team.nick) ? team.nick[0].toLowerCase() + 'pr' : team.nick.toLowerCase()) + '.svg'"
       />
     </div>
     <div

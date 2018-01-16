@@ -242,12 +242,11 @@
         if (this.picks.isTotalYardsLocked) {
           this.totalYards = this.picks.totalYards
         }
-        this.isLoading = this.games.length === 0 || !this.league.users
-        // this.$forceUpdate()
+        this.isLoading = !this.league.users
       },
       league (val) {
         console.log('watched league changed', val)
-        this.isLoading = this.games.length === 0 || Object.keys(this.picks).length === 0
+        this.isLoading = Object.keys(this.picks).length === 0
       },
     },
     mounted () {
