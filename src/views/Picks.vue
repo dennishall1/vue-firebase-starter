@@ -61,6 +61,7 @@
         <mu-radio
           v-model="picks[game.gameId]"
           nativeValue="0"
+          :disabled="picks.isLocked"
         ></mu-radio>
         <tristate-toggle
           :value="Number(picks[game.gameId])"
