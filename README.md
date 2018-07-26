@@ -14,6 +14,8 @@ Progressive Web App (PWA) starter-kit using vue/vuex/vue(x)-router/offline-plugi
 
 // this year miami had a hurricane, so a game was postponed ..  but normally, you can just check if all games for a given week are 'final'
 
+- [ ] Instructions: update `UpdateScores.vue` for the current season & week.  Update apify run script for pre/reg/post and week.  Run apify script, then go to /update-scores.
+- [ ] Refactor to improve maintainability: don't calculate the season and seasonType and week in multiple places.
 - [*] Actually calculate and declare the King of the Week (pretty much done)
 - [ ] Account for tied football games (half point each)
 - [ ] Log not only the points per week, but also a WEEK POINT - whoever won each week.

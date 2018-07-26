@@ -4,6 +4,7 @@
 */
 function pageFunction () {
   //var $ = context.jQuery;
+  var season = 2018;
   var results = [];
   var game = {};
   var commentSplit;
@@ -119,7 +120,7 @@ function pageFunction () {
   function getStaticDataForTeam (teamObj) {
     var teams = [
       {
-        "season": 2017,
+        "season": season,
         "teamId": "3800",
         "abbr": "ARI",
         "cityState": "Arizona",
@@ -136,7 +137,7 @@ function pageFunction () {
         "teamSiteUrl": "http://www.azcardinals.com/",
         "teamSiteTicketUrl": "http://www.azcardinals.com/tickets/"
       }, {
-        "season": 2017,
+        "season": season,
         "teamId": "0200",
         "abbr": "ATL",
         "cityState": "Atlanta",
@@ -153,7 +154,7 @@ function pageFunction () {
         "teamSiteUrl": "http://www.atlantafalcons.com/",
         "teamSiteTicketUrl": "http://www.atlantafalcons.com/tickets/"
       }, {
-        "season": 2017,
+        "season": season,
         "teamId": "0325",
         "abbr": "BAL",
         "cityState": "Baltimore",
@@ -170,7 +171,7 @@ function pageFunction () {
         "teamSiteUrl": "http://www.baltimoreravens.com/",
         "teamSiteTicketUrl": "http://www.baltimoreravens.com/tickets/"
       }, {
-        "season": 2017,
+        "season": season,
         "teamId": "0610",
         "abbr": "BUF",
         "cityState": "Buffalo",
@@ -187,7 +188,7 @@ function pageFunction () {
         "teamSiteUrl": "http://www.buffalobills.com/",
         "teamSiteTicketUrl": "http://www.buffalobills.com/tickets/"
       }, {
-        "season": 2017,
+        "season": season,
         "teamId": "0750",
         "abbr": "CAR",
         "cityState": "Carolina",
@@ -204,7 +205,7 @@ function pageFunction () {
         "teamSiteUrl": "http://www.panthers.com/",
         "teamSiteTicketUrl": "http://www.panthers.com/tickets/"
       }, {
-        "season": 2017,
+        "season": season,
         "teamId": "0810",
         "abbr": "CHI",
         "cityState": "Chicago",
@@ -221,7 +222,7 @@ function pageFunction () {
         "teamSiteUrl": "http://www.chicagobears.com/",
         "teamSiteTicketUrl": "http://www.chicagobears.com/tickets/"
       }, {
-        "season": 2017,
+        "season": season,
         "teamId": "0920",
         "abbr": "CIN",
         "cityState": "Cincinnati",
@@ -238,7 +239,7 @@ function pageFunction () {
         "teamSiteUrl": "http://www.bengals.com/",
         "teamSiteTicketUrl": "http://www.bengals.com/tickets/"
       }, {
-        "season": 2017,
+        "season": season,
         "teamId": "1050",
         "abbr": "CLE",
         "cityState": "Cleveland",
@@ -255,7 +256,7 @@ function pageFunction () {
         "teamSiteUrl": "http://www.clevelandbrowns.com/",
         "teamSiteTicketUrl": "http://www.clevelandbrowns.com/tickets/"
       }, {
-        "season": 2017,
+        "season": season,
         "teamId": "1200",
         "abbr": "DAL",
         "cityState": "Dallas",
@@ -272,7 +273,7 @@ function pageFunction () {
         "teamSiteUrl": "http://www.dallascowboys.com/",
         "teamSiteTicketUrl": "http://www.dallascowboys.com/tickets/index.html"
       }, {
-        "season": 2017,
+        "season": season,
         "teamId": "1400",
         "abbr": "DEN",
         "cityState": "Denver",
@@ -289,7 +290,7 @@ function pageFunction () {
         "teamSiteUrl": "http://www.denverbroncos.com/",
         "teamSiteTicketUrl": "http://www.denverbroncos.com/ticketOffice"
       }, {
-        "season": 2017,
+        "season": season,
         "teamId": "1540",
         "abbr": "DET",
         "cityState": "Detroit",
@@ -306,7 +307,7 @@ function pageFunction () {
         "teamSiteUrl": "http://www.detroitlions.com/",
         "teamSiteTicketUrl": "http://www.detroitlions.com/tickets/index.html"
       }, {
-        "season": 2017,
+        "season": season,
         "teamId": "1800",
         "abbr": "GB",
         "cityState": "Green Bay",
@@ -323,7 +324,7 @@ function pageFunction () {
         "teamSiteUrl": "http://www.packers.com/",
         "teamSiteTicketUrl": "http://www.packers.com/tickets/"
       }, {
-        "season": 2017,
+        "season": season,
         "teamId": "2120",
         "abbr": "HOU",
         "cityState": "Houston",
@@ -340,7 +341,7 @@ function pageFunction () {
         "teamSiteUrl": "http://www.houstontexans.com/",
         "teamSiteTicketUrl": "http://www.houstontexans.com/tickets/"
       }, {
-        "season": 2017,
+        "season": season,
         "teamId": "2200",
         "abbr": "IND",
         "cityState": "Indianapolis",
@@ -357,7 +358,7 @@ function pageFunction () {
         "teamSiteUrl": "http://www.colts.com/",
         "teamSiteTicketUrl": "http://www.colts.com/tickets-and-stadium/index.html"
       }, {
-        "season": 2017,
+        "season": season,
         "teamId": "2250",
         "abbr": "JAX",
         "cityState": "Jacksonville",
@@ -374,7 +375,7 @@ function pageFunction () {
         "teamSiteUrl": "http://www.jaguars.com/",
         "teamSiteTicketUrl": "http://prod.www.jaguars.clubs.nfl.com/tickets/index.html"
       }, {
-        "season": 2017,
+        "season": season,
         "teamId": "2310",
         "abbr": "KC",
         "cityState": "Kansas City",
@@ -391,7 +392,7 @@ function pageFunction () {
         "teamSiteUrl": "http://www.kcchiefs.com/",
         "teamSiteTicketUrl": "http://www.kcchiefs.com/tickets/"
       }, {
-        "season": 2017,
+        "season": season,
         "teamId": "2510",
         "abbr": "LA",
         "cityState": "Los Angeles Rams",
@@ -408,7 +409,7 @@ function pageFunction () {
         "teamSiteUrl": "http://www.therams.com/",
         "teamSiteTicketUrl": "http://welcomehomerams.com/"
       }, {
-        "season": 2017,
+        "season": season,
         "teamId": "4400",
         "abbr": "LAC",
         "cityState": "Los Angeles Chargers",
@@ -425,7 +426,7 @@ function pageFunction () {
         "teamSiteUrl": "http://www.chargers.com/",
         "teamSiteTicketUrl": "http://www.chargers.com/tickets/"
       }, {
-        "season": 2017,
+        "season": season,
         "teamId": "2700",
         "abbr": "MIA",
         "cityState": "Miami",
@@ -442,7 +443,7 @@ function pageFunction () {
         "teamSiteUrl": "http://www.miamidolphins.com/",
         "teamSiteTicketUrl": "http://www.miamidolphins.com/tickets-and-stadium/index.html"
       }, {
-        "season": 2017,
+        "season": season,
         "teamId": "3000",
         "abbr": "MIN",
         "cityState": "Minnesota",
@@ -459,7 +460,7 @@ function pageFunction () {
         "teamSiteUrl": "http://www.vikings.com/",
         "teamSiteTicketUrl": "http://www.vikings.com/tickets/index.html"
       }, {
-        "season": 2017,
+        "season": season,
         "teamId": "3200",
         "abbr": "NE",
         "cityState": "New England",
@@ -476,7 +477,7 @@ function pageFunction () {
         "teamSiteUrl": "http://www.patriots.com/",
         "teamSiteTicketUrl": "http://www.patriots.com/stadium/index.cfm?ac=TicketSales"
       }, {
-        "season": 2017,
+        "season": season,
         "teamId": "3300",
         "abbr": "NO",
         "cityState": "New Orleans",
@@ -493,7 +494,7 @@ function pageFunction () {
         "teamSiteUrl": "http://www.neworleanssaints.com/",
         "teamSiteTicketUrl": "http://www.neworleanssaints.com/tickets-and-stadium/index.html"
       }, {
-        "season": 2017,
+        "season": season,
         "teamId": "3410",
         "abbr": "NYG",
         "cityState": "New York Giants",
@@ -510,7 +511,7 @@ function pageFunction () {
         "teamSiteUrl": "http://www.giants.com/",
         "teamSiteTicketUrl": "http://www.giants.com/tickets/"
       }, {
-        "season": 2017,
+        "season": season,
         "teamId": "3430",
         "abbr": "NYJ",
         "cityState": "New York Jets",
@@ -527,7 +528,7 @@ function pageFunction () {
         "teamSiteUrl": "http://www.newyorkjets.com/",
         "teamSiteTicketUrl": "http://www.newyorkjets.com/tickets-and-stadium/index.html"
       }, {
-        "season": 2017,
+        "season": season,
         "teamId": "2520",
         "abbr": "OAK",
         "cityState": "Oakland",
@@ -544,7 +545,7 @@ function pageFunction () {
         "teamSiteUrl": "http://www.raiders.com/",
         "teamSiteTicketUrl": "http://www.raiders.com/Tickets/"
       }, {
-        "season": 2017,
+        "season": season,
         "teamId": "3700",
         "abbr": "PHI",
         "cityState": "Philadelphia",
@@ -561,7 +562,7 @@ function pageFunction () {
         "teamSiteUrl": "http://www.philadelphiaeagles.com/",
         "teamSiteTicketUrl": "http://www.philadelphiaeagles.com/tickets/index.html"
       }, {
-        "season": 2017,
+        "season": season,
         "teamId": "3900",
         "abbr": "PIT",
         "cityState": "Pittsburgh",
@@ -578,7 +579,7 @@ function pageFunction () {
         "teamSiteUrl": "http://www.steelers.com/",
         "teamSiteTicketUrl": "http://www.steelers.com/tickets/"
       }, {
-        "season": 2017,
+        "season": season,
         "teamId": "4600",
         "abbr": "SEA",
         "cityState": "Seattle",
@@ -595,7 +596,7 @@ function pageFunction () {
         "teamSiteUrl": "http://www.seahawks.com/",
         "teamSiteTicketUrl": "http://www.seahawks.com/Tickets/Tickets.aspx?id=49670"
       }, {
-        "season": 2017,
+        "season": season,
         "teamId": "4500",
         "abbr": "SF",
         "cityState": "San Francisco",
@@ -612,7 +613,7 @@ function pageFunction () {
         "teamSiteUrl": "http://www.sf49ers.com/",
         "teamSiteTicketUrl": "http://www.sf49ers.com/tickets/single.php?section=TI%20Single"
       }, {
-        "season": 2017,
+        "season": season,
         "teamId": "4900",
         "abbr": "TB",
         "cityState": "Tampa Bay",
@@ -629,7 +630,7 @@ function pageFunction () {
         "teamSiteUrl": "http://www.buccaneers.com/",
         "teamSiteTicketUrl": "http://www.buccaneers.com/tickets/gametickets.aspx"
       }, {
-        "season": 2017,
+        "season": season,
         "teamId": "2100",
         "abbr": "TEN",
         "cityState": "Tennessee",
@@ -646,7 +647,7 @@ function pageFunction () {
         "teamSiteUrl": "http://www.titansonline.com/",
         "teamSiteTicketUrl": "http://www.titansonline.com/stadium/tickets/index.php"
       }, {
-        "season": 2017,
+        "season": season,
         "teamId": "5110",
         "abbr": "WAS",
         "cityState": "Washington",
@@ -663,7 +664,7 @@ function pageFunction () {
         "teamSiteUrl": "http://www.redskins.com/",
         "teamSiteTicketUrl": "http://www.redskins.com/tickets/"
       }, {
-        "season": 2017,
+        "season": season,
         "teamId": "8600",
         "abbr": "AFC",
         "cityState": "AFC Pro Bowl",
@@ -672,10 +673,10 @@ function pageFunction () {
         "teamType": "PRO",
         "conferenceAbbr": "AFC",
         "conference": {"id": "0011", "abbr": "AFC", "fullName": "American Football Conference"},
-        "yearFound": 2018,
+        "yearFound": season,
         "stadiumName": "Camping World Stadium"
       }, {
-        "season": 2017,
+        "season": season,
         "teamId": "8700",
         "abbr": "NFC",
         "cityState": "NFC Pro Bowl",
@@ -684,7 +685,7 @@ function pageFunction () {
         "teamType": "PRO",
         "conferenceAbbr": "NFC",
         "conference": {"id": "0015", "abbr": "NFC", "fullName": "National Football Conference"},
-        "yearFound": 2018,
+        "yearFound": season,
         "stadiumName": "Camping World Stadium"
       }
     ];

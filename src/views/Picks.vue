@@ -184,8 +184,8 @@
       var season = date.getFullYear() - (date.getMonth() < 3 ? 1 : 0)
       // var Wednesday = 3
       // update each year:
-      var preSeasonStartDate = new Date('2017-08-02 EST')
-      var regularSeasonStartDate = new Date('2017-09-06 EST')
+      var preSeasonStartDate = new Date(season + '-08-02 EST')
+      var regularSeasonStartDate = new Date(season + '-09-06 EST')
       // var regularSeasonEndDate = new Date(season, 11, 31, 23, 59, 59)
       var seasonType
       var week

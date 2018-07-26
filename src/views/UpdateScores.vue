@@ -64,17 +64,19 @@
     },
     watch: {
       user (val) {
-        var _week = '11'
-        if (0 === 1 && val) {
+        var _week = '1'
+        if (val) {
           // get the user ids for the current league
           fetch('https://api.apify.com/v1/rs7ntQdHsu4L2g8iA/crawlers/5cCo62Xs7omPRqtNR/lastExec/results?token=icrF4BDXjBePhFcqHFmtd9rf9&format=json&status=SUCCEEDED&r=102')
             .then(response => {
               return response.json()
             }).then(json => {
-              var weekDb = firebase.database().ref('/schedules/season/2017/REG/week/' + _week)
+              var weekDb = firebase.database().ref('/schedules/season/2018/PRE/week/' + _week)
+              console.log('apify json', json)
+              console.log('firebase json', JSON.stringify(weekDb))
               this.isLoading = false
-              this.season = '2017'
-              this.seasonType = 'REG'
+              this.season = '2018'
+              this.seasonType = 'PRE'
               this.week = _week
               json[0].pageFunctionResult.forEach(game => {
                 // find the matching game in the db and set the score
@@ -112,8 +114,8 @@
         var date = new Date()
         // if the date is March or earlier, then it is still the previous year's season.
         var season = date.getFullYear() - (date.getMonth() < 3 ? 1 : 0)
-        var preSeasonStartDate = new Date('2017-08-02 EST')
-        var regularSeasonStartDate = new Date('2017-09-06 EST')
+        var preSeasonStartDate = new Date(season + '-08-02 EST')
+        var regularSeasonStartDate = new Date(season + '-09-06 EST')
         // var regularSeasonEndDate = new Date(season, 11, 31, 23, 59, 59)
         var seasonType
         var week
@@ -134,7 +136,7 @@
           }
         }
         week = '' + week
-        if (seasonType === 'POST') {
+        if (seasonType === 'PRE') {
           fetch('https://api.apify.com/v1/rs7ntQdHsu4L2g8iA/crawlers/5cCo62Xs7omPRqtNR/lastExec/results?token=icrF4BDXjBePhFcqHFmtd9rf9&format=json&status=SUCCEEDED')
             .then(response => {
               return response.json()
@@ -142,16 +144,14 @@
               this.isLoading = false
               this.season = season
               this.seasonType = seasonType
-              this.week = _week
-              var updateObj = {}
+              var updateObj = []
               json[0].pageFunctionResult.forEach(game => {
-                var week = '' + Math.ceil((new Date(game.isoTime) - regularSeasonStartDate) / (7 * 24 * 60 * 60 * 1000))
+                var week = this.week = '' + (game.week || Math.max(0, Math.ceil((new Date(game.isoTime) - regularSeasonStartDate) / (7 * 24 * 60 * 60 * 1000))))
                 // find the matching game in the db and set the score
                 console.log('game from json', 'week', week, 'gameId', game.gameId, 'game', game)
-                updateObj[week] = updateObj[week] || []
-                updateObj[week].push(game)
+                updateObj.push(game)
               })
-              firebase.database().ref(`/schedules/season/${season}/POST/week/`).set(updateObj)
+              firebase.database().ref(`/schedules/season/${season}/PRE/week/${this.week}`).set(updateObj)
               console.log('parsed json', this.games)
             }).catch(ex => {
               console.log('parsing failed', ex)

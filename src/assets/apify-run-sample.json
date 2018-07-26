@@ -1,0 +1,35 @@
+{
+  "curWeek": "0",
+  "week": "0",
+  "date": "2018-08-02",
+  "currWeek": "0",
+  "formattedDate": "Thursday, August 02",
+  "time": "8:00",
+  "formattedTime": "8:00 PM",
+  "gameId": 2018080251,
+  "gametype": "PRE",
+  "localtime": "20:00:00",
+  "site": "Tom Benson Hall of Fame Stadium",
+  "phase": "PRE",
+  "isoTime": 1533240000000,
+  "gameDate": "08/02/2018",
+  "gameTimeEastern": "20:00:00",
+  "homeTeam": {
+    "abbr": "BAL",
+    "nick": "Ravens",
+    "teamId": "0325",
+    "cityState": "Baltimore",
+    "conferenceAbbr": "AFC",
+    "divisionAbbr": "ACN"
+  },
+  "visitorTeam": {
+    "abbr": "CHI",
+    "nick": "Bears",
+    "teamId": "0810",
+    "cityState": "Chicago",
+    "conferenceAbbr": "NFC",
+    "divisionAbbr": "NCN"
+  }
+}
+
+
