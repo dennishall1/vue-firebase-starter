@@ -66,9 +66,12 @@
   import firebase from 'firebase'
   import TeamCard from '@/components/TeamCard'
   import fetch from 'unfetch'
+  import mixins from '@/mixins'
+  import { season, seasonType, week, weeks } from '@/util/season'
 
   export default {
     name: 'Standings',
+    mixins: [mixins],
     components: {
       TeamCard,
     },
@@ -153,45 +156,6 @@
       },
     },
     data () {
-      var date = new Date()
-      // if the date is March or earlier, then it is still the previous year's season.
-      var season = date.getFullYear() - (date.getMonth() < 3 ? 1 : 0)
-      // var Wednesday = 3
-      // update each year:
-      var preSeasonStartDate = new Date(season + '-08-02 EST')
-      var regularSeasonStartDate = new Date(season + '-09-06 EST')
-      // var regularSeasonEndDate = new Date(season, 11, 31, 23, 59, 59)
-      var seasonType
-      var week
-      var minWeek
-      var maxWeek
-      var weeks = []
-
-      if (date < regularSeasonStartDate) {
-        seasonType = 'PRE'
-        week = Math.max(0, (date - preSeasonStartDate) / (7 * 24 * 60 * 60 * 1000))
-        minWeek = 0
-        maxWeek = 4
-      } else {
-        seasonType = 'REG'
-        week = Math.ceil((date - regularSeasonStartDate) / (7 * 24 * 60 * 60 * 1000))
-        minWeek = 1
-        maxWeek = 17
-        if (week > maxWeek) {
-          seasonType = 'POST'
-          minWeek = maxWeek + 1
-          maxWeek = maxWeek + 5
-          week = Math.min(week, maxWeek)
-        }
-      }
-
-      week = '' + week
-
-      // `[...Array(N).keys()]` .. someday
-      for (var i = minWeek; i <= maxWeek; i++) {
-        weeks.push('' + i)
-      }
-
       return {
         isLoading: true,
         isUpdatingScores: false,
@@ -226,42 +190,6 @@
       this.setWeek()
     },
     methods: {
-      setWeek (week) {
-        // console.log(this.week, arguments)
-        if (week || week === 0) {
-          this.week = '' + week
-        }
-        this.$store.dispatch('setGamesRef', firebase.database().ref(
-          '/schedules/season/' + this.season +
-          '/' + this.seasonType +
-          '/week/' + this.week
-        ))
-      },
-      setLeagueRef () {
-        // console.log(this.week, arguments)
-        this.$store.dispatch('setLeagueRef', firebase.database().ref(
-          '/leagues/' + this.leagueId
-        ))
-      },
-      leagueUserPicksForThisWeek (userId) {
-        var leagueUsers = (this.league || {}).users || {}
-        var leagueUser = leagueUsers[userId || (this.user || {}).uid] || {}
-        return (
-          leagueUser.season &&
-          leagueUser.season[this.season] &&
-          leagueUser.season[this.season][this.seasonType] &&
-          leagueUser.season[this.season][this.seasonType].week[this.week]
-        )
-      },
-      getDateDisplayForGame (game) {
-        var dayNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']
-        var dayOfWeek = dayNames[new Date(game.gameDate).getDay()]
-        var timeOfDay = game.gameTimeEastern.split(':')
-        var amOrPm = Number(timeOfDay[0]) > 11 ? 'pm' : 'am'
-        timeOfDay[0] = Number(timeOfDay[0]) > 12 ? Number(timeOfDay[0]) - 12 : timeOfDay[0]
-        timeOfDay = timeOfDay.join(':').replace(/:00$/, '')
-        return '<span class="date-header__day">' + dayOfWeek + '</span> ' + timeOfDay + ' ' + amOrPm
-      },
       updateScores () {
         var _this = this
         var now = Date.now()

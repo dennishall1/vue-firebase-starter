@@ -14,8 +14,8 @@ Progressive Web App (PWA) starter-kit using vue/vuex/vue(x)-router/offline-plugi
 
 // this year miami had a hurricane, so a game was postponed ..  but normally, you can just check if all games for a given week are 'final'
 
-- [ ] Instructions: update `UpdateScores.vue` for the current season & week.  Update apify run script for pre/reg/post and week.  Run apify script, then go to /update-scores.
-- [ ] Refactor to improve maintainability: don't calculate the season and seasonType and week in multiple places.
+- [ ] Instructions: update `UpdateScores.vue` for the current season & week.  Update apify run script for pre/reg/post and week.  Run apify script, then go to /update-scores.  That route gets the results from the latest apify run and updates the schedule part of the database.
+- [*] Refactor to improve maintainability: don't calculate the season and seasonType and week in multiple places.
 - [*] Actually calculate and declare the King of the Week (pretty much done)
 - [ ] Account for tied football games (half point each)
 - [ ] Log not only the points per week, but also a WEEK POINT - whoever won each week.
@@ -25,7 +25,7 @@ Progressive Web App (PWA) starter-kit using vue/vuex/vue(x)-router/offline-plugi
 - [ ] Tiebreakers:
       (A) Point spread between the most recent game you lost that is different (according to the list),
       (B) If you made the exact same picks, you have to also pick the total yards gained on the last game of the week
-- [ ] Make weeks bookmarkable
+- [ ] Make weeks bookmarkable - reconsider, maybe this isn't a great idea.  Seems better to have it always the current week
 - [ ] Allow users to set their own displayName
 - [ ] Improve DB security: Only allow users to make picks for their own account 
 - [ ] Refactor for resiliency: Use team nickname or abbreviation instead of `0` for away team and `1` for home team.

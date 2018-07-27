@@ -127,13 +127,17 @@
 
 <script>
   import { mapState } from 'vuex'
-  import firebase from 'firebase'
-  // import 'whatwg-fetch'
   import TeamCard from '@/components/TeamCard'
   import TristateToggle from '@/components/TristateToggle'
+  import mixins from '@/mixins'
+  import { season, seasonType, week, weeks } from '@/util/season'
+  // import 'whatwg-fetch'
+
+  console.log('mixins', mixins)
 
   export default {
     name: 'Picks',
+    mixins: [mixins],
     components: {
       TristateToggle,
       TeamCard,
@@ -179,43 +183,6 @@
       },
     },
     data () {
-      var date = new Date()
-      // if the date is March or earlier, then it is still the previous year's season.
-      var season = date.getFullYear() - (date.getMonth() < 3 ? 1 : 0)
-      // var Wednesday = 3
-      // update each year:
-      var preSeasonStartDate = new Date(season + '-08-02 EST')
-      var regularSeasonStartDate = new Date(season + '-09-06 EST')
-      // var regularSeasonEndDate = new Date(season, 11, 31, 23, 59, 59)
-      var seasonType
-      var week
-      var minWeek
-      var maxWeek
-      var weeks = []
-
-      if (date < regularSeasonStartDate) {
-        seasonType = 'PRE'
-        week = Math.max(0, (date - preSeasonStartDate) / (7 * 24 * 60 * 60 * 1000))
-        minWeek = 0
-        maxWeek = 4
-      } else {
-        seasonType = 'REG'
-        week = Math.ceil((date - regularSeasonStartDate) / (7 * 24 * 60 * 60 * 1000))
-        minWeek = 1
-        maxWeek = 17
-        if (week > maxWeek) {
-          seasonType = 'POST'
-          minWeek = maxWeek + 1
-          maxWeek = maxWeek + 5
-          week = Math.min(week, maxWeek)
-        }
-      }
-
-      // `[...Array(N).keys()]` .. someday
-      for (var i = minWeek; i <= maxWeek; i++) {
-        weeks.push('' + i)
-      }
-
       return {
         isLoading: true,
         season: '' + season,
@@ -260,81 +227,6 @@
       //     event.preventDefault()
       //   }
       // },
-      leagueUserPicksForThisWeek (userId) {
-        var leagueUsers = (this.league || {}).users || {}
-        var leagueUser = leagueUsers[userId || (this.user || {}).uid] || {}
-        return (
-          leagueUser.season &&
-          leagueUser.season[this.season] &&
-          leagueUser.season[this.season][this.seasonType] &&
-          leagueUser.season[this.season][this.seasonType].week[this.week]
-        )
-      },
-      setWeek (week) {
-        // console.log(this.week, arguments)
-        this.$store.dispatch('setGamesRef', firebase.database().ref(
-          '/schedules/season/' + this.season +
-          '/' + this.seasonType +
-          '/week/' + (week || this.week)
-        ))
-        if (week || week === 0) {
-          this.week = '' + week
-        }
-        this.setPicksRef()
-      },
-      getPicksRef () {
-        return firebase.database().ref(
-          '/leagues/' + this.leagueId +
-          '/users/' + this.user.uid +
-          '/season/' + this.season +
-          '/' + this.seasonType +
-          '/week/' + this.week
-        )
-      },
-      setPicksRef () {
-        if (this.user && this.week) {
-          this.$store.dispatch('setPicksRef', this.getPicksRef())
-        }
-      },
-      setLeagueRef () {
-        // console.log(this.week, arguments)
-        this.$store.dispatch('setLeagueRef', firebase.database().ref(
-          '/leagues/' + this.leagueId
-        ))
-      },
-      // setTotalYards (event) {
-      //   console.log(event)
-      //   this.getPicksRef().child('totalYards').set(event.target.value)
-      // },
-      toggleTeamPick (gameId, teamIndex) {
-        if (this.picks.isLocked || !this.user || this.isLoading) {
-          return
-        }
-        this.isLoading = true
-//        this.picks['' + gameId] = teamIndex
-        console.log('toggleTeamPick', gameId, teamIndex)
-        this.getPicksRef().child('' + gameId).set('' + teamIndex).then(() => {
-          this.isLoading = false
-        })
-      },
-      lockPicks () {
-        if (!this.user || this.isLoading) return
-        window.scrollTo(0, 0)
-        this.getPicksRef().child('isLocked').set(true).then(() => {
-          this.isLoading = false
-          this.shouldShowLockPicksDialog = false
-          window.scrollTo(0, 0)
-        })
-      },
-      lockTotalYards () {
-        if (!this.user || this.isLoading) return
-        window.scrollTo(0, 0)
-        this.getPicksRef().child('totalYards').set(this.totalYards)
-        this.getPicksRef().child('isTotalYardsLocked').set(true).then(() => {
-          this.isLoading = false
-          this.shouldShowLockTotalYardsDialog = false
-        })
-      },
     },
   }
 </script>

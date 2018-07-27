@@ -38,6 +38,9 @@
   import firebase from 'firebase'
   import fetch from 'unfetch'
   import TeamCard from '@/components/TeamCard'
+  import { season, seasonType } from '@/util/season'
+
+  // console.log(season, seasonType)
 
   export default {
     name: 'UpdateScores',
@@ -65,12 +68,13 @@
     watch: {
       user (val) {
         var _week = '1'
-        if (val) {
+        if (0 && val) {
           // get the user ids for the current league
           fetch('https://api.apify.com/v1/rs7ntQdHsu4L2g8iA/crawlers/5cCo62Xs7omPRqtNR/lastExec/results?token=icrF4BDXjBePhFcqHFmtd9rf9&format=json&status=SUCCEEDED&r=102')
             .then(response => {
               return response.json()
-            }).then(json => {
+            })
+            .then(json => {
               var weekDb = firebase.database().ref('/schedules/season/2018/PRE/week/' + _week)
               console.log('apify json', json)
               console.log('firebase json', JSON.stringify(weekDb))
@@ -111,42 +115,18 @@
             })
         }
 
-        var date = new Date()
-        // if the date is March or earlier, then it is still the previous year's season.
-        var season = date.getFullYear() - (date.getMonth() < 3 ? 1 : 0)
-        var preSeasonStartDate = new Date(season + '-08-02 EST')
-        var regularSeasonStartDate = new Date(season + '-09-06 EST')
-        // var regularSeasonEndDate = new Date(season, 11, 31, 23, 59, 59)
-        var seasonType
-        var week
-        var maxWeek
-
-        if (date < regularSeasonStartDate) {
-          seasonType = 'PRE'
-          week = Math.max(0, (date - preSeasonStartDate) / (7 * 24 * 60 * 60 * 1000))
-          maxWeek = 4
-        } else {
-          seasonType = 'REG'
-          week = Math.ceil((date - regularSeasonStartDate) / (7 * 24 * 60 * 60 * 1000))
-          maxWeek = 17
-          if (week > maxWeek) {
-            seasonType = 'POST'
-            maxWeek = maxWeek + 4
-            week = Math.min(week, maxWeek)
-          }
-        }
-        week = '' + week
-        if (seasonType === 'PRE') {
+        if (0 && seasonType === 'PRE') {
           fetch('https://api.apify.com/v1/rs7ntQdHsu4L2g8iA/crawlers/5cCo62Xs7omPRqtNR/lastExec/results?token=icrF4BDXjBePhFcqHFmtd9rf9&format=json&status=SUCCEEDED')
             .then(response => {
               return response.json()
-            }).then(json => {
+            })
+            .then(json => {
               this.isLoading = false
               this.season = season
               this.seasonType = seasonType
               var updateObj = []
               json[0].pageFunctionResult.forEach(game => {
-                var week = this.week = '' + (game.week || Math.max(0, Math.ceil((new Date(game.isoTime) - regularSeasonStartDate) / (7 * 24 * 60 * 60 * 1000))))
+                var week = this.week = '' + game.week
                 // find the matching game in the db and set the score
                 console.log('game from json', 'week', week, 'gameId', game.gameId, 'game', game)
                 updateObj.push(game)
