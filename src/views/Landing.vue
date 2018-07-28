@@ -123,14 +123,14 @@
             v-for="tieBreaker in tieBreakers"
           >
             <td>
-              {{ tieBreaker.displayName }}:
+              {{ (tieBreaker || {}).displayName }}:
             </td>
             <td>
-              {{ tieBreaker.totalYards }}
+              {{ (tieBreaker || {}).totalYards }}
             </td>
           </tr>
           <tr
-            v-if="sortedGames[sortedGames.length - 1].totalYards"
+            v-if="(sortedGames[sortedGames.length - 1] || {}).totalYards"
             class="tie-breakers__actual-yards"
           >
             <td>Actual:</td>

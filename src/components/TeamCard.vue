@@ -29,7 +29,7 @@
           'team-card__picked-by-user--current-user': user.isCurrentUser,
         }"
     >
-      {{ user.displayName.split(' ')[0] }}
+      {{ (user.displayName || 'Anonymous').split(' ')[0] }}
     </div>
   </div>
 </template>
