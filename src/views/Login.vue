@@ -70,4 +70,8 @@ export default {
 <style lang="sass">
 .hello
   text-align: center
+#firebaseui-auth-container
+  color: #444
+  input
+    color: #444
 </style>
