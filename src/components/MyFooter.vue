@@ -18,6 +18,7 @@
     padding: 20px
     color: #888
     font-size: 14px
+    margin-top: 50px
     a
       color: inherit
       display: inline-block
