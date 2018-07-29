@@ -10,6 +10,7 @@ import Profile from '@/views/Profile'
 import UpdateScores from '@/views/UpdateScores'
 import Aloha from '@/views/Aloha'
 import FourOhFour from '@/views/FourOhFour'
+import PrivacyPolicy from '@/views/PrivacyPolicy'
 
 Vue.use(Router)
 
@@ -67,6 +68,10 @@ const router = new Router({
       meta: {
         requiresAuth: true,
       },
+    },
+    {
+      path: '/privacy-policy',
+      component: PrivacyPolicy,
     },
     {
       path: '/aloha',
