@@ -17,6 +17,13 @@ Progressive Web App (PWA) starter-kit using vue/vuex/vue(x)-router/offline-plugi
 - [ ] Instructions: update `UpdateScores.vue` for the current season & week.  Update apify run script for pre/reg/post and week.  Run apify script, then go to /update-scores.  That route gets the results from the latest apify run and updates the schedule part of the database.
 - [*] Refactor to improve maintainability: don't calculate the season and seasonType and week in multiple places.
 - [*] Actually calculate and declare the King of the Week (pretty much done)
+- [ ] Refactor to merge the picks and landing pages. - right now it's a little bit confusing naming and what does the football
+- [ ] Allow users to set their own displayName AND MAKE SURE everyone has a displayName.  Make sure the account creation page actually saves the username.
+- [ ] FIX "show only relevant games" .. it should be based on how many league users have locked their picks for that week, NOT on the total number of league users.
+- [ ] SHOW the "KING" symbol next to the user's name in more places than just the standings page -- f/x, next to their picks on the landing page
+- [ ] Improve "show only relevant games" .. allow a user to compare their picks with ONE other league member
+- [ ] Figure out how user.displayName can show up in the header and profile page, but not in the main content on the Landing page. (For a new email-based account sign-up.)
+- [ ] Figure out why have to refresh the picks page to get it to work sometimes.
 - [ ] Account for tied football games (half point each)
 - [ ] Log not only the points per week, but also a WEEK POINT - whoever won each week.
 - [ ] Consider the POST season as a single week.
@@ -25,15 +32,13 @@ Progressive Web App (PWA) starter-kit using vue/vuex/vue(x)-router/offline-plugi
 - [ ] Tiebreakers:
       (A) Point spread between the most recent game you lost that is different (according to the list),
       (B) If you made the exact same picks, you have to also pick the total yards gained on the last game of the week
-- [ ] Make weeks bookmarkable - reconsider, maybe this isn't a great idea.  Seems better to have it always the current week
-- [ ] Allow users to set their own displayName
+- [ ] Make weeks bookmarkable - reconsider, maybe this isn't a great idea.  Seems better to have it always the current week.  Use *session* variable for current week selection.
 - [ ] Improve DB security: Only allow users to make picks for their own account 
 - [ ] Refactor for resiliency: Use team nickname or abbreviation instead of `0` for away team and `1` for home team.
 - [ ] Refactor for reduced db storage and improved code simplicity: <br>&nbsp;&nbsp;&nbsp;&nbsp;
       Instead of leagues/users/{userId}/season/... Use a datastructure nearly identical to the season, and store a minimal user reference 'under' the game for that week  
 - [ ] Refactor for consistency: Add `seasonType` to the paths `/season/2017/REG/week/12` -> `/season/2017/seasonType/REG/week/12`
 - [ ] Consider to refactor to eliminate `picks` object, instead just use `league`
-- [ ] Refactor to merge the picks and landing pages.
 - [ ] Refactor Standings to reduce db load (only check top two players' spread).
 - [ ] Allow users to delete their account
 - [ ] Email users if they have the exact same picks as someone else

@@ -17,14 +17,14 @@
       to="picks"
     />
     <mu-raised-button
-      v-show="!user"
+      v-show="!user.isLoggedIn"
       label="Log In"
       secondary
       slot="right"
       to="/login"
     />
     <mu-flat-button
-      v-show="user"
+      v-show="user.isLoggedIn"
       :label="user && user.displayName"
       labelPosition="before"
       slot="right"
@@ -64,6 +64,7 @@ export default {
   },
   watch: {
     user (val) {
+      console.log('header watched user', val)
       if (val) {
         this.userMenuTrigger = this.$refs.userButton.$el
       }

@@ -15,6 +15,7 @@ const uiConfig = {
   callbacks: {
     // Called when the user has been successfully signed in
     signInSuccess (user, credential, redirectUrl) {
+      console.log('login - signInSuccess', user, credential, redirectUrl)
       router.push('/')
       // Do not redirect.
       return false
@@ -56,6 +57,7 @@ export default {
   },
   watch: {
     user (val) {
+      console.log('login watched user', val)
       if (val) {
         if (this.$router.currentRoute.query.redirect) {
           this.$router.replace(this.$router.currentRoute.query.redirect)

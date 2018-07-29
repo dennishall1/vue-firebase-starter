@@ -255,8 +255,11 @@
       }
     },
     watch: {
-      user () {
-        this.setLeagueRef()
+      user (val) {
+        console.log('landing - user watched', val)
+        if (val) {
+          this.setLeagueRef()
+        }
       },
       league (val) {
         console.log('on league updated', val)

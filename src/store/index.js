@@ -6,7 +6,12 @@ Vue.use(Vuex)
 
 const store = new Vuex.Store({
   state: {
-    user: null,
+    user: {
+      uid: '',
+      displayName: 'Anon',
+      isLoggedIn: false,
+      photoURL: '',
+    },
     league: {},
     picks: {},
     games: [],
@@ -24,7 +29,14 @@ const store = new Vuex.Store({
   },
   mutations: {
     UPDATE_USER (state, user) {
-      state.user = user
+      console.log('vuex store UPDATE_USER', state.user, user)
+      // state.user = user
+      Object.keys(user || {}).forEach(key => {
+        Vue.set(state.user, key, user[key])
+      })
+      Vue.set(state.user, 'displayName', (user || {}).displayName || 'Anon')
+      Vue.set(state.user, 'isLoggedIn', !!user)
+      Vue.set(state.user, 'photoURL', (user || {}).photoURL)
     },
     ...firebaseMutations,
   },
