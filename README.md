@@ -19,7 +19,7 @@ Progressive Web App (PWA) starter-kit using vue/vuex/vue(x)-router/offline-plugi
 - [*] Actually calculate and declare the King of the Week (pretty much done)
 - [ ] Refactor to merge the picks and landing pages. - right now it's a little bit confusing naming and what does the football
 - [ ] Allow users to set their own displayName AND MAKE SURE everyone has a displayName.  Make sure the account creation page actually saves the username.
-- [ ] FIX "show only relevant games" .. it should be based on how many league users have locked their picks for that week, NOT on the total number of league users.
+- [*] FIX "show only relevant games" .. it should be based on how many league users have locked their picks for that week, NOT on the total number of league users.
 - [ ] SHOW the "KING" symbol next to the user's name in more places than just the standings page -- f/x, next to their picks on the landing page
 - [ ] Improve "show only relevant games" .. allow a user to compare their picks with ONE other league member
 - [ ] Figure out how user.displayName can show up in the header and profile page, but not in the main content on the Landing page. (For a new email-based account sign-up.)

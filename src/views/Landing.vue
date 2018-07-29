@@ -81,7 +81,7 @@
           :data-id="game.gameId"
           :class="{
             // if everybody picked the same team, the game is irrelevant
-            'is-game-irrelevant': shouldCollapseIrrelevantGames && numLeagueUsers === Math.max(
+            'is-game-irrelevant': shouldCollapseIrrelevantGames && leagueUserPicks.numLeagueUsersWithLockedPicks === Math.max(
               (leagueUserPicks[game.gameId] || [[], []])[0].length,
               (leagueUserPicks[game.gameId] || [[], []])[1].length
             )
@@ -209,11 +209,12 @@
         return Object.keys(this.league.users || {}).length
       },
       leagueUserPicks () {
-        var leagueUserPicks = {}
-        var leagueUsers = this.league.users
         var _this = this
+        var leagueUserPicks = {numLeagueUsersWithLockedPicks: 0}
+        var leagueUsers = this.league.users
         Object.keys(leagueUsers || {}).forEach(userId => {
           var leagueUserPicksForThisWeek = this.leagueUserPicksForThisWeek(userId)
+          leagueUserPicks.numLeagueUsersWithLockedPicks += (leagueUserPicksForThisWeek || {}).isLocked ? 1 : 0
           if (leagueUserPicksForThisWeek) {
             Object.keys(leagueUserPicksForThisWeek || {}).forEach(gameId => {
               // people who picked the visitor team [], people who picked the home team [].
