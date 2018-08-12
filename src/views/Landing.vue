@@ -326,7 +326,6 @@
 
     .team-card
       width: 315px
-      cursor: pointer
       display: flex
       align-items: flex-start
       flex-direction: row-reverse

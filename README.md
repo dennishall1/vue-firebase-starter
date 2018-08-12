@@ -14,7 +14,9 @@ Progressive Web App (PWA) starter-kit using vue/vuex/vue(x)-router/offline-plugi
 
 // this year miami had a hurricane, so a game was postponed ..  but normally, you can just check if all games for a given week are 'final'
 
-- [ ] Fix tiebreaker not working
+- [ ] Track the Week-points and game-points.
+- [ ] Implement the Bonus Point - if you pick all games correctly for the week, you get an extra Week-point.
+- [ ] Only the last game of the week needs totalYards.
 - [ ] Default to the current week
 - [ ] Show Season points.
 - [ ] lower priority .. go ahead and award the winner once it is impossible for anyone to catch up.

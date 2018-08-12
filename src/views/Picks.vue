@@ -51,37 +51,49 @@
     </p>
 
     <ul v-if="games && games.length">
-      <li v-for="game in sortedGames" :key="game.gameId" :data-id="game.gameId" :class="{'disabled': picks.isLocked}">
-        <team-card
-          :team="game.visitorTeam"
-          :isPicked="picks[game.gameId] === '0'"
-          :isGameHasPick="game.gameId in picks"
-          @pick="toggleTeamPick(game.gameId, '0')"
-        ></team-card>
-        <mu-radio
-          v-model="picks[game.gameId]"
-          nativeValue="0"
-          :disabled="picks.isLocked"
-        ></mu-radio>
-        <tristate-toggle
-          :value="Number(picks[game.gameId])"
-          :gameId="game.gameId"
-          :isLoading="isLoading"
-          :disabled="picks.isLocked"
-          @change="toggleTeamPick"
-        ></tristate-toggle>
-        <mu-radio
-          v-model="picks[game.gameId]"
-          nativeValue="1"
-          :disabled="picks.isLocked"
-        ></mu-radio>
-        <team-card
-          :team="game.homeTeam"
-          :isPicked="picks[game.gameId] === '1'"
-          :isGameHasPick="game.gameId in picks"
-          @pick="toggleTeamPick(game.gameId, '1')"
-        ></team-card>
-      </li>
+      <template
+        v-for="(game, gameIndex) in sortedGames"
+      >
+        <li
+          :class="{
+            'date-header': 1,
+            'is-same-day': gameIndex && game.gameDate === sortedGames[gameIndex - 1].gameDate
+          }"
+          v-if="gameIndex === 0 || game.isoTime !== sortedGames[gameIndex - 1].isoTime"
+          v-html="getDateDisplayForGame(game)"
+        ></li>
+        <li :key="game.gameId" :data-id="game.gameId" :class="{'disabled': picks.isLocked}">
+          <team-card
+            :team="game.visitorTeam"
+            :isPicked="picks[game.gameId] === '0'"
+            :isGameHasPick="game.gameId in picks"
+            @pick="toggleTeamPick(game.gameId, '0')"
+          ></team-card>
+          <mu-radio
+            v-model="picks[game.gameId]"
+            nativeValue="0"
+            :disabled="picks.isLocked"
+          ></mu-radio>
+          <tristate-toggle
+            :value="Number(picks[game.gameId])"
+            :gameId="game.gameId"
+            :isLoading="isLoading"
+            :disabled="picks.isLocked"
+            @change="toggleTeamPick"
+          ></tristate-toggle>
+          <mu-radio
+            v-model="picks[game.gameId]"
+            nativeValue="1"
+            :disabled="picks.isLocked"
+          ></mu-radio>
+          <team-card
+            :team="game.homeTeam"
+            :isPicked="picks[game.gameId] === '1'"
+            :isGameHasPick="game.gameId in picks"
+            @pick="toggleTeamPick(game.gameId, '1')"
+          ></team-card>
+        </li>
+      </template>
       <li v-if="picks.isTotalYardsLocked">
         Tie-breaker: {{ totalYards }} Total Yards
       </li>
@@ -257,12 +269,26 @@
     ul
       list-style-type: none
       padding: 0
+      display: inline-flex
+      flex-direction: column
 
     li
       display: flex
       margin: 0 0 40px
       justify-content: center
       align-items: center
+
+    .date-header
+      display: block
+      margin: 0 0 20px
+      &__day
+        display: block
+        margin: 0 0 30px
+        padding: 10px 0
+        border-bottom: 1px solid #aaa
+      &.is-same-day
+        .date-header__day
+          display: none
 
     .team-card
       width: 315px
