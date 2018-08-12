@@ -14,6 +14,12 @@ Progressive Web App (PWA) starter-kit using vue/vuex/vue(x)-router/offline-plugi
 
 // this year miami had a hurricane, so a game was postponed ..  but normally, you can just check if all games for a given week are 'final'
 
+- [ ] Fix tiebreaker not working
+- [ ] Default to the current week
+- [ ] Show Season points.
+- [ ] lower priority .. go ahead and award the winner once it is impossible for anyone to catch up.
+- [ ] lower priority .. figure out ""
+- [ ] SHOW the "KING" symbol next to the user's name in more places than just the standings page -- f/x, next to their picks on the landing page
 - [ ] Instructions: update `UpdateScores.vue` for the current season & week.  Update apify run script for pre/reg/post and week.  Run apify script, then go to /update-scores.  That route gets the results from the latest apify run and updates the schedule part of the database.
 - [*] Refactor to improve maintainability: don't calculate the season and seasonType and week in multiple places.
 - [*] Actually calculate and declare the King of the Week (pretty much done)
@@ -21,7 +27,6 @@ Progressive Web App (PWA) starter-kit using vue/vuex/vue(x)-router/offline-plugi
 - [ ] Allow users to set their own displayName AND MAKE SURE everyone has a displayName.  Make sure the account creation page actually saves the username.
 - [*] FIX "show only relevant games" .. it should be based on how many league users have locked their picks for that week, NOT on the total number of league users.
 - [ ] Fix "show only relevant games" .. if a game is the last game of the week, and the logged-in user has had to select `totalYards`, it *is* relevant, because it's the tie-breaker.
-- [ ] SHOW the "KING" symbol next to the user's name in more places than just the standings page -- f/x, next to their picks on the landing page
 - [ ] Improve "show only relevant games" .. allow a user to compare their picks with ONE other league member
 - [ ] Figure out how user.displayName can show up in the header and profile page, but not in the main content on the Landing page. (For a new email-based account sign-up.)
 - [ ] Figure out why have to refresh the picks page to get it to work sometimes.

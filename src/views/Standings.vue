@@ -125,6 +125,7 @@
           }
         }).sort((userA, userB) => {
           if (userA.points === userB.points) {
+            // debugger
             // users will only have 'totalYards' property if they have the same picks
             if (actualTotalYards && 'totalYards' in userA && 'totalYards' in userB) {
               return Math.abs(userA.totalYards - actualTotalYards) < Math.abs(userB.totalYards - actualTotalYards) ? -1 : 1

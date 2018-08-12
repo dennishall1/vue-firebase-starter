@@ -36,7 +36,7 @@ if (date < regularSeasonStartDate) {
 //   week = _week
 // }
 
-week = '' + week
+week = '' + (week | 0)
 
 // `[...Array(N).keys()]` .. someday
 for (var i = minWeek; i <= maxWeek; i++) {
