@@ -1,59 +1,88 @@
 <template>
   <div class="wrapper standings">
-    <h1>
-      Week
-      <mu-select-field v-model="week" @change="setWeek">
-        <mu-menu-item
-          v-for="_week in weeks"
-          :key="_week"
-          :value="_week"
-          :title="_week"
-        ></mu-menu-item>
-      </mu-select-field>
-    </h1>
-    <table>
-      <tbody>
-        <tr
-          v-for="(user, index) in standings"
-        >
-          <td>
-            <Crown
-              v-if="index === 0 && allScoresAreFinal"
-            ></Crown>
-          </td>
-          <td>
-            {{ user.points }}
-          </td>
-          <td>
-            {{ (user.displayName || 'Anonymous') }}
-            <span v-if="0 === 1 && typeof user.totalYards !== 'undefined'">
-              <span style="font-size: 75%; color: #999">
-                ({{ user.totalYards }}<span style="font-size: 75%;">yds</span>)
-              </span>
-            </span>
-          </td>
-        </tr>
-        <tr>
-          <td
-            colspan="3"
-            v-if="week === actualWeek"
+
+    <div class="standings-week">
+      <h1>
+        Week
+        <mu-select-field v-model="week" @change="setWeek">
+          <mu-menu-item
+            v-for="_week in weeks"
+            :key="_week"
+            :value="_week"
+            :title="_week"
+          ></mu-menu-item>
+        </mu-select-field>
+      </h1>
+      <table>
+        <tbody>
+          <tr
+            v-for="(user, index) in standings"
           >
-            Did a game just end?
-            <!-- todo: don't show this if we already have all the data we need -->
-            <!-- todo: automate this instead -->
-            <a
-              :class="{
-                'update-scores-link': true,
-                'loading': !this.canUpdateScores,
-              }"
-              @click="updateScores"
-            >
-              Update Scores
-            </a>
-          </td>
-        </tr>
-      </tbody>
-    </table>
+            <td>
+              <Crown
+                v-if="index === 0 && allScoresAreFinal"
+              ></Crown>
+            </td>
+            <td>
+              {{ user.points }}
+            </td>
+            <td>
+              {{ (user.displayName || 'Anonymous') }}
+              <span v-if="0 === 1 && typeof user.totalYards !== 'undefined'">
+                <span style="font-size: 75%; color: #999">
+                  ({{ user.totalYards }}<span style="font-size: 75%;">yds</span>)
+                </span>
+              </span>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="standings-season">
+      <h1>
+        {{ season }} {{ (seasonType === 'REG' ? 'Regular' : seasonType) + ' Season Totals' }}
+      </h1>
+      <table>
+        <tbody>
+          <tr
+            v-for="(user, index) in seasonStandings"
+          >
+            <td>
+              <Crown
+                v-if="false && index === 0 && allScoresAreFinal"
+              ></Crown>
+            </td>
+            <td>
+              {{ user.weekPoints }}
+            </td>
+            <td>
+              {{ (user.displayName || 'Anonymous') }}
+              <div style="font-size: 70%; color: #aaa;">
+                Game Points: {{ user.gamePoints }}
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div
+      class="update-scores-link-container"
+      v-if="week === actualWeek && !allScoresAreFinal"
+    >
+      Did a game just end?
+      <!-- todo: automate this instead -->
+      <a
+        :class="{
+          'update-scores-link': true,
+          'loading': !this.canUpdateScores,
+        }"
+        @click="updateScores"
+      >
+        Update Scores
+      </a>
+    </div>
   </div>
 </template>
 
@@ -95,6 +124,30 @@
             : (game1.gameId < game2.gameId ? -1 : 1)
         })
         return this.games
+      },
+      seasonStandings () {
+        var leagueUsers = (this.league || {}).users || {}
+        return (
+          Object.keys(leagueUsers || {})
+          .map(userId => {
+            var leagueUser = leagueUsers[userId || (this.user || {}).uid] || {}
+            var leagueUserSeason = (
+              leagueUser &&
+              leagueUser.season &&
+              leagueUser.season[this.season] &&
+              leagueUser.season[this.season][this.seasonType]
+            )
+            return {
+              userId: userId,
+              displayName: leagueUsers[userId].displayName,
+              gamePoints: leagueUserSeason.gamePoints,
+              weekPoints: leagueUserSeason.weekPoints,
+            }
+          })
+          .sort((a, b) => {
+            return a.weekPoints > b.weekPoints ? -1 : (a.weekPoints === b.weekPoints ? (a.gamePoints > b.gamePoints ? -1 : 1) : 1)
+          })
+        )
       },
       standings () {
         var leagueUsers = this.league.users
@@ -159,7 +212,7 @@
 
         // update the db with game points, if we haven't already.
         var leadersPicksForThisWeek = _standings[0] && _standings[0].userId && this.leagueUserPicksForThisWeek(_standings[0].userId)
-        if (this.allScoresAreFinal && leadersPicksForThisWeek && !leadersPicksForThisWeek.isWinner) {
+        if (this.allScoresAreFinal && leadersPicksForThisWeek && !('isWinner' in leadersPicksForThisWeek)) {
           _standings.forEach((userWeeklyStanding, i) => {
             var isWinner = i === 0
             var gamePoints = userWeeklyStanding.points
@@ -414,6 +467,11 @@
       font-weight: normal
       color: white
 
+    .standings-season
+      margin-top: 80px
+      td
+        vertical-align: top
+
     table
       margin: 0 auto
 
@@ -423,11 +481,9 @@
       + td
         text-align: left
 
-    tr:last-child
-      td
-        padding-top: 40px
-        font-size: 14px
-        text-transform: none
+    .update-scores-link-container
+      padding-top: 40px
+      font-size: 14px
 
     .update-scores-link
       display: inline-block
