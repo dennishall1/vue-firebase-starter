@@ -40,9 +40,9 @@
     </div>
 
     <div class="standings-season">
-      <h1>
+      <h2>
         {{ season }} {{ (seasonType === 'REG' ? 'Regular' : seasonType) + ' Season Totals' }}
-      </h1>
+      </h2>
       <table>
         <tbody>
           <tr
