@@ -32,8 +32,7 @@ Progressive Web App (PWA) starter-kit using vue/vuex/vue(x)-router/offline-plugi
 - [ ] Improve "show only relevant games" .. allow a user to compare their picks with ONE other league member
 - [ ] Figure out how user.displayName can show up in the header and profile page, but not in the main content on the Landing page. (For a new email-based account sign-up.)
 - [ ] Figure out why have to refresh the picks page to get it to work sometimes.
-- [ ] Account for tied football games (half point each)
-- [ ] Log not only the points per week, but also a WEEK POINT - whoever won each week.
+- [ ] Account for tied football games (everyone gets one point)
 - [ ] Consider the POST season as a single week.
 - [ ] Automate scores data imports (getting there)
 - [ ] Enforce cut-off time for making picks - before the first game starts (and also server-side) -- including perhaps a different cutoff time for the total yards

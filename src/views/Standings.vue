@@ -17,13 +17,9 @@
           v-for="(user, index) in standings"
         >
           <td>
-            <!-- crown-simple.svg -->
-            <svg
+            <Crown
               v-if="index === 0 && allScoresAreFinal"
-              xmlns="http://www.w3.org/2000/svg" width="30" height="30" viewBox="0 0 168.52 168.52"
-            >
-              <path style="fill: #00adea" d="M151.9 51.46c-9.2 0-16.66 7.47-16.66 16.65 0 4.93 2.18 9.3 5.6 12.36L119.8 88l-29.9-35.54c6.46-2.3 11.1-8.4 11.1-15.63.02-9.18-7.45-16.65-16.63-16.65-9.2 0-16.66 7.47-16.66 16.65 0 7.16 4.57 13.22 10.9 15.57L48.72 88l-20.98-7.54c3.4-3.05 5.58-7.43 5.58-12.35 0-9.17-7.47-16.64-16.65-16.64C7.48 51.46 0 58.93 0 68.1c0 7.82 5.44 14.36 12.7 16.14v45.12c0 .32.13.6.2.88-.12.46-.2.93-.2 1.43 0 16.2 64.24 16.68 71.56 16.68 7.32 0 71.55-.48 71.55-16.68 0-.5-.05-.97-.17-1.43.08-.3.18-.56.18-.88V84.24c7.3-1.78 12.72-8.32 12.72-16.13 0-9.17-7.45-16.64-16.63-16.64zM75.83 36.83c0-4.7 3.84-8.55 8.55-8.55 4.7 0 8.54 3.84 8.54 8.55 0 4.72-3.84 8.55-8.55 8.55-4.72 0-8.56-3.83-8.56-8.55zM48.64 96.6c1.58.56 3.37.08 4.46-1.23L84.27 58.3l31.17 37.1c1.1 1.28 2.87 1.76 4.46 1.2l27.8-10v36.48c-17.5-7.8-57.73-8.08-63.44-8.08-5.7 0-45.95.3-63.45 8.08v-36.5l27.83 10zm35.63 43.65c-31.2 0-51.07-3.72-59.34-6.84-1.63-.6-2.85-1.2-3.57-1.73 2.58-1.9 10.97-4.53 24.97-6.36 9.87-1.3 22.5-2.2 37.94-2.2s28.1.9 37.95 2.2c14 1.84 22.4 4.46 24.97 6.37-.74.54-1.95 1.13-3.57 1.74-8.27 3.14-28.15 6.85-59.36 6.85zM8.12 68.1c0-4.7 3.84-8.54 8.55-8.54s8.55 3.84 8.55 8.55c0 4.72-3.84 8.56-8.55 8.56s-8.55-3.84-8.55-8.55zm143.77 8.56c-4.72 0-8.56-3.84-8.56-8.55 0-4.7 3.84-8.54 8.55-8.54 4.7 0 8.54 3.84 8.54 8.55 0 4.72-3.84 8.56-8.55 8.56z"></path>
-            </svg>
+            ></Crown>
           </td>
           <td>
             {{ user.points }}
@@ -64,6 +60,7 @@
 <script>
   import { mapState } from 'vuex'
   import firebase from 'firebase'
+  import Crown from '@/components/Crown'
   import TeamCard from '@/components/TeamCard'
   import fetch from 'unfetch'
   import mixins from '@/mixins'
@@ -73,6 +70,7 @@
     name: 'Standings',
     mixins: [mixins],
     components: {
+      Crown,
       TeamCard,
     },
     computed: {
@@ -103,57 +101,93 @@
         var actualTotalYards = (this.sortedGames[this.sortedGames.length - 1] || {}).totalYards
         // console.log('STANDINGS :: this.league.users', Object.keys(this.league.users || {}))
         // console.log('STANDINGS :: this.games', JSON.stringify(this.games || ''))
-        return Object.keys(leagueUsers || {}).map(userId => {
-          var leagueUserPicksForThisWeek = this.leagueUserPicksForThisWeek(userId)
-          return {
-            userId: userId,
-            displayName: leagueUsers[userId].displayName,
-            picks: leagueUserPicksForThisWeek || {},
-            totalYards: (leagueUserPicksForThisWeek || {}).totalYards,
-            points: Object.keys(leagueUserPicksForThisWeek || {}).reduce((points, gameId) => {
-              var game = this.games.find(game => { return '' + game.gameId === '' + gameId })
-              // console.log('userId', userId, 'gameId', gameId, 'game', game, game && (game.homeTeam.score + ', ' + game.visitorTeam.score))
-              if (!game) return points
-              game.winner = '' + Number(game.homeTeam.score > game.visitorTeam.score)
-              return points + (
-                game.phase === 'FINAL' &&
-                leagueUserPicksForThisWeek[gameId] === game.winner
-                  ? 1
-                  : 0
-              )
-            }, 0),
-          }
-        }).sort((userA, userB) => {
-          if (userA.points === userB.points) {
-            // debugger
-            // users will only have 'totalYards' property if they have the same picks
-            if (actualTotalYards && 'totalYards' in userA && 'totalYards' in userB) {
-              return Math.abs(userA.totalYards - actualTotalYards) < Math.abs(userB.totalYards - actualTotalYards) ? -1 : 1
+        var _standings = (
+          Object.keys(leagueUsers || {})
+          .map(userId => {
+            var leagueUserPicksForThisWeek = this.leagueUserPicksForThisWeek(userId)
+            return {
+              userId: userId,
+              displayName: leagueUsers[userId].displayName,
+              picks: leagueUserPicksForThisWeek || {},
+              totalYards: (leagueUserPicksForThisWeek || {}).totalYards,
+              points: Object.keys(leagueUserPicksForThisWeek || {}).reduce((points, gameId) => {
+                var game = this.games.find(game => { return '' + game.gameId === '' + gameId })
+                // console.log('userId', userId, 'gameId', gameId, 'game', game, game && (game.homeTeam.score + ', ' + game.visitorTeam.score))
+                if (!game) return points
+                game.winner = '' + Number(game.homeTeam.score > game.visitorTeam.score)
+                return points + (
+                  game.phase === 'FINAL' &&
+                  leagueUserPicksForThisWeek[gameId] === game.winner
+                    ? 1
+                    : 0
+                )
+              }, 0),
             }
-            // (reverse operates in-place, so let's use an old-fashioned loop instead)
-            var userASpread
-            var userBSpread
-            var userAPick
-            var userBPick
-            var game
-            var gameSpread
-            for (var i = this.sortedGames.length - 1; i >= 0; i--) {
-              game = this.sortedGames[i]
-              userAPick = userA.picks[game.gameId]
-              userBPick = userB.picks[game.gameId]
-              if (userAPick !== userBPick) {
-                gameSpread = Math.abs(game.homeTeam.score - game.visitorTeam.score)
-                if (userAPick === game.winner) {
-                  userASpread = gameSpread
-                } else {
-                  userBSpread = gameSpread
+          })
+          .sort((userA, userB) => {
+            if (userA.points === userB.points) {
+              // debugger
+              // users will only have 'totalYards' property if they have the same picks
+              if (actualTotalYards && 'totalYards' in userA && 'totalYards' in userB) {
+                return Math.abs(userA.totalYards - actualTotalYards) < Math.abs(userB.totalYards - actualTotalYards) ? -1 : 1
+              }
+              // (reverse operates in-place, so let's use an old-fashioned loop instead)
+              var userASpread
+              var userBSpread
+              var userAPick
+              var userBPick
+              var game
+              var gameSpread
+              for (var i = this.sortedGames.length - 1; i >= 0; i--) {
+                game = this.sortedGames[i]
+                userAPick = userA.picks[game.gameId]
+                userBPick = userB.picks[game.gameId]
+                if (userAPick !== userBPick) {
+                  gameSpread = Math.abs(game.homeTeam.score - game.visitorTeam.score)
+                  if (userAPick === game.winner) {
+                    userASpread = gameSpread
+                  } else {
+                    userBSpread = gameSpread
+                  }
                 }
               }
+              return userASpread > userBSpread ? -1 : 1
             }
-            return userASpread > userBSpread ? -1 : 1
-          }
-          return userA.points > userB.points ? -1 : 1
-        })
+            return userA.points > userB.points ? -1 : 1
+          })
+        )
+
+        // update the db with game points, if we haven't already.
+        var leadersPicksForThisWeek = _standings[0] && _standings[0].userId && this.leagueUserPicksForThisWeek(_standings[0].userId)
+        if (this.allScoresAreFinal && leadersPicksForThisWeek && !leadersPicksForThisWeek.isWinner) {
+          _standings.forEach((userWeeklyStanding, i) => {
+            var isWinner = i === 0
+            var gamePoints = userWeeklyStanding.points
+            var weekPoints = isWinner ? 1 : 0
+            var userSeasonDb = firebase.database().ref(
+              '/leagues/' + this.leagueId +
+              '/users/' + userWeeklyStanding.userId +
+              '/season/' + this.season +
+              '/' + this.seasonType
+            )
+            var userWeekDb = firebase.database().ref(
+              '/leagues/' + this.leagueId +
+              '/users/' + userWeeklyStanding.userId +
+              '/season/' + this.season +
+              '/' + this.seasonType +
+              '/week/' + this.week
+            )
+            userSeasonDb.once('value', snapshot => {
+              var dbNode = snapshot.val()
+              userWeekDb.child('isWinner').set(isWinner)
+              userWeekDb.child('gamePoints').set(gamePoints)
+              userSeasonDb.child('weekPoints').set((dbNode.weekPoints || 0) + weekPoints)
+              userSeasonDb.child('gamePoints').set((dbNode.gamePoints || 0) + gamePoints)
+            })
+          })
+        }
+
+        return _standings
       },
     },
     data () {
