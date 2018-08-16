@@ -191,6 +191,34 @@
             ? (game1.isoTime < game2.isoTime ? -1 : 1)
             : (game1.gameId < game2.gameId ? -1 : 1)
         })
+
+        // enforce a time cut-off.
+        var currentTime = Date.now()
+        var firstGameTime = +(new Date([
+          this.games[0].formattedDate,
+          (new Date()).getFullYear(),
+          this.games[0].formattedTime,
+          'EST',
+        ].join(' ')))
+        var hoursUntilFirstGame = (firstGameTime - currentTime) / 1000 / 60 / 60
+        var date = new Date()
+        var secondSundayInMarch = new Date(date.getFullYear() + '/03/01 02:30 EDT')
+        while (secondSundayInMarch.getDay() !== 0) {
+          secondSundayInMarch = new Date(secondSundayInMarch.getTime() + (24 * 60 * 60 * 1000))
+        }
+        var firstSundayInNovember = new Date(date.getFullYear() + '/11/01 02:30 EDT')
+        while (firstSundayInNovember.getDay() !== 0) {
+          firstSundayInNovember = new Date(firstSundayInNovember.getTime() + (24 * 60 * 60 * 1000))
+        }
+        var isEST = date.getTime() < secondSundayInMarch.getTime() || date.getTime() > firstSundayInNovember.getTime()
+        var noonEST = new Date(date.getFullYear() + '/' + (date.getMonth() + 1) + '/' + date.getDate() + ' 12:00 ' + (isEST ? 'EST' : 'EDT'))
+        var hoursUntilNoonEST = (+noonEST - currentTime) / 1000 / 60 / 60
+        console.log('hoursUntilFirstGame', hoursUntilFirstGame, 'hoursUntilNoonEST', hoursUntilNoonEST)
+        if (hoursUntilFirstGame < 0.1 || (hoursUntilFirstGame < 14 && hoursUntilNoonEST < 0)) {
+          // user is not allowed to pick teams for this week.
+          this.picks.isLocked = true
+        }
+
         return this.games
       },
     },
@@ -269,8 +297,8 @@
     ul
       list-style-type: none
       padding: 0
-      display: inline-flex
-      flex-direction: column
+      display: table
+      margin: 0 auto
 
     li
       display: flex

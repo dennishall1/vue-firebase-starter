@@ -14,14 +14,13 @@ Progressive Web App (PWA) starter-kit using vue/vuex/vue(x)-router/offline-plugi
 
 // this year miami had a hurricane, so a game was postponed ..  but normally, you can just check if all games for a given week are 'final'
 
-- [ ] Track the Week-points and game-points.
+- [*] Track the Week-points and game-points.
+- [*] ^ Show them.
 - [ ] Implement the Bonus Point - if you pick all games correctly for the week, you get an extra Week-point.
 - [ ] Only the last game of the week needs totalYards.
-- [ ] Default to the current week
-- [ ] Show Season points.
+- [*] Default to the current week
 - [ ] lower priority .. go ahead and award the winner once it is impossible for anyone to catch up.
-- [ ] lower priority .. figure out ""
-- [ ] SHOW the "KING" symbol next to the user's name in more places than just the standings page -- f/x, next to their picks on the landing page
+- [ ] SHOW the "KING" symbol next to the user's name in more places than just the standings page -- f/x, next to their picks on the landing page -- perhaps as easy as keeping track of uuid for *current* king -- and set that inside of the 'update scores' function.
 - [ ] Instructions: update `UpdateScores.vue` for the current season & week.  Update apify run script for pre/reg/post and week.  Run apify script, then go to /update-scores.  That route gets the results from the latest apify run and updates the schedule part of the database.
 - [*] Refactor to improve maintainability: don't calculate the season and seasonType and week in multiple places.
 - [*] Actually calculate and declare the King of the Week (pretty much done)
@@ -32,11 +31,13 @@ Progressive Web App (PWA) starter-kit using vue/vuex/vue(x)-router/offline-plugi
 - [ ] Improve "show only relevant games" .. allow a user to compare their picks with ONE other league member
 - [ ] Figure out how user.displayName can show up in the header and profile page, but not in the main content on the Landing page. (For a new email-based account sign-up.)
 - [ ] Figure out why have to refresh the picks page to get it to work sometimes.
-- [ ] Account for tied football games (everyone gets one point)
+- [*] Account for tied football games (everyone gets one point)
 - [ ] Consider the POST season as a single week.
 - [ ] Automate scores data imports (getting there)
-- [ ] Enforce cut-off time for making picks - before the first game starts (and also server-side) -- including perhaps a different cutoff time for the total yards
-- [ ] Tiebreakers:
+- [*] Enforce a cut-off time for making picks - before the first game starts
+- [ ] Also server-side: Enforce a cut-off time for making picks - before the first game starts
+- [ ] Perhaps have a different cut-off time for picking totalYards -- there is currently no cut-off time for totalYards.
+- [*] Tiebreakers:
       (A) Point spread between the most recent game you lost that is different (according to the list),
       (B) If you made the exact same picks, you have to also pick the total yards gained on the last game of the week
 - [ ] Make weeks bookmarkable - reconsider, maybe this isn't a great idea.  Seems better to have it always the current week.  Use *session* variable for current week selection.
