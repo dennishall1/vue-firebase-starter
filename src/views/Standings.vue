@@ -154,6 +154,8 @@
         var actualTotalYards = (this.sortedGames[this.sortedGames.length - 1] || {}).totalYards
         // console.log('STANDINGS :: this.league.users', Object.keys(this.league.users || {}))
         // console.log('STANDINGS :: this.games', JSON.stringify(this.games || ''))
+        if (!actualTotalYards) return
+        console.log((this.sortedGames[this.sortedGames.length - 1] || {}).homeTeam.score)
         var _standings = (
           Object.keys(leagueUsers || {})
           .map(userId => {
@@ -181,12 +183,15 @@
             if (userA.points === userB.points) {
               // debugger
               // users will only have 'totalYards' property if they have the same picks
-              if (actualTotalYards && 'totalYards' in userA && 'totalYards' in userB) {
+              if (actualTotalYards && userA.totalYards !== undefined && userB.totalYards !== undefined) {
+                console.log('both users have totalYards', userA.totalYards, userB.totalYards)
                 return Math.abs(userA.totalYards - actualTotalYards) < Math.abs(userB.totalYards - actualTotalYards) ? -1 : 1
               }
               // (reverse operates in-place, so let's use an old-fashioned loop instead)
               var userASpread
               var userBSpread
+              // var userASpreadGame
+              // var userBSpreadGame
               var userAPick
               var userBPick
               var game
@@ -197,14 +202,17 @@
                 userBPick = userB.picks[game.gameId]
                 if (userAPick !== userBPick) {
                   gameSpread = Math.abs(game.homeTeam.score - game.visitorTeam.score)
-                  if (userAPick === game.winner) {
-                    userASpread = gameSpread
+                  if (userAPick !== game.winner) {
+                    userASpread = userASpread || gameSpread
+                    // userASpreadGame = userASpreadGame || game
                   } else {
-                    userBSpread = gameSpread
+                    userBSpread = userBSpread || gameSpread
+                    // userBSpreadGame = userBSpreadGame || game
                   }
                 }
               }
-              return userASpread > userBSpread ? -1 : 1
+              console.log('userASpread', userASpread, userBSpread/* , userASpreadGame, userBSpreadGame */)
+              return userASpread < userBSpread ? -1 : 1
             }
             return userA.points > userB.points ? -1 : 1
           })
