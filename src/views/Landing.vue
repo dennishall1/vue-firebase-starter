@@ -84,7 +84,8 @@
             'is-game-irrelevant': shouldCollapseIrrelevantGames && leagueUserPicks.numLeagueUsersWithLockedPicks === Math.max(
               (leagueUserPicks[game.gameId] || [[], []])[0].length,
               (leagueUserPicks[game.gameId] || [[], []])[1].length
-            )
+            ),
+            'in-progress': game.phase !== 'PRE' && game.phase !== 'FINAL'
           }"
         >
           <team-card
@@ -312,6 +313,9 @@
       opacity: 0
       max-height: 0
       padding: 0
+    .in-progress
+      .score
+        animation: 2s breathe linear infinite
     .date-header
       display: block
       margin: 0 0 20px
@@ -419,5 +423,13 @@
         min-width: 50px
         flex-grow: 1000
         flex-basis: 30%
+
+  @keyframes breathe
+    0%
+      opacity: 1
+    50%
+      opacity: .4
+    100%
+      opacity: 1
 
 </style>
