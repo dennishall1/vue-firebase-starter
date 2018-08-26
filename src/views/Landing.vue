@@ -315,7 +315,7 @@
       padding: 0
     .in-progress
       .score
-        animation: 2s breathe linear infinite
+        animation: 3s breathe linear infinite
     .date-header
       display: block
       margin: 0 0 20px
