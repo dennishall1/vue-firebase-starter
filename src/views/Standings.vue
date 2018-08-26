@@ -154,7 +154,7 @@
         var actualTotalYards = (this.sortedGames[this.sortedGames.length - 1] || {}).totalYards
         // console.log('STANDINGS :: this.league.users', Object.keys(this.league.users || {}))
         // console.log('STANDINGS :: this.games', JSON.stringify(this.games || ''))
-        if (!actualTotalYards) return
+        if (this.allScoresAreFinal && !actualTotalYards) return
         console.log((this.sortedGames[this.sortedGames.length - 1] || {}).homeTeam.score)
         var _standings = (
           Object.keys(leagueUsers || {})
