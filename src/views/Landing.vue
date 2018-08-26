@@ -94,13 +94,13 @@
           ></team-card>
           <span
             class="score"
-            :data-is-winner="game.visitorTeam.score > game.homeTeam.score"
+            :data-is-winner="getWinningTeamOfGame(game) === 'visitor'"
           >
             {{ game.visitorTeam.score }}
           </span>
           <span
             class="score"
-            :data-is-winner="game.visitorTeam.score < game.homeTeam.score"
+            :data-is-winner="getWinningTeamOfGame(game) === 'home'"
           >
             {{ game.homeTeam.score }}
           </span>
