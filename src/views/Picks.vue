@@ -50,6 +50,13 @@
       Your picks are locked in for this week.
     </p>
 
+    <p
+      v-if="picks.isPastCutoff && !picks.isLocked"
+      class="picks__is-locked-message"
+    >
+      It is past the cutoff time.
+    </p>
+
     <ul v-if="games && games.length">
       <template
         v-for="(game, gameIndex) in sortedGames"
@@ -62,7 +69,7 @@
           v-if="gameIndex === 0 || game.isoTime !== sortedGames[gameIndex - 1].isoTime"
           v-html="getDateDisplayForGame(game)"
         ></li>
-        <li :key="game.gameId" :data-id="game.gameId" :class="{'disabled': picks.isLocked}">
+        <li :key="game.gameId" :data-id="game.gameId" :class="{'disabled': picks.isLocked || picks.isPastCutoff}">
           <team-card
             :team="game.visitorTeam"
             :isPicked="picks[game.gameId] === '0'"
@@ -72,19 +79,19 @@
           <mu-radio
             v-model="picks[game.gameId]"
             nativeValue="0"
-            :disabled="picks.isLocked"
+            :disabled="picks.isLocked || picks.isPastCutoff"
           ></mu-radio>
           <tristate-toggle
             :value="Number(picks[game.gameId])"
             :gameId="game.gameId"
             :isLoading="isLoading"
-            :disabled="picks.isLocked"
+            :disabled="picks.isLocked || picks.isPastCutoff"
             @change="toggleTeamPick"
           ></tristate-toggle>
           <mu-radio
             v-model="picks[game.gameId]"
             nativeValue="1"
-            :disabled="picks.isLocked"
+            :disabled="picks.isLocked || picks.isPastCutoff"
           ></mu-radio>
           <team-card
             :team="game.homeTeam"
@@ -130,7 +137,7 @@
     <mu-raised-button
       label="Lock Picks"
       :disabled="Object.keys(picks).length < games.length"
-      v-if="!picks.isLocked"
+      v-if="!picks.isLocked && !picks.isPastCutoff"
       @click="shouldShowLockPicksDialog = true"
     ></mu-raised-button>
 
@@ -214,10 +221,9 @@
         var noonEST = new Date(date.getFullYear() + '/' + (date.getMonth() + 1) + '/' + date.getDate() + ' 12:00 ' + (isEST ? 'EST' : 'EDT'))
         var hoursUntilNoonEST = (+noonEST - currentTime) / 1000 / 60 / 60
         console.log('hoursUntilFirstGame', hoursUntilFirstGame, 'hoursUntilNoonEST', hoursUntilNoonEST)
-        if (hoursUntilFirstGame < 0.1 || (hoursUntilFirstGame < 14 && hoursUntilNoonEST < 0)) {
-          // user is not allowed to pick teams for this week.
-          this.picks.isLocked = true
-        }
+        console.log('hoursUntilFirstGame', hoursUntilFirstGame, 'hoursUntilNoonEST', hoursUntilNoonEST, (hoursUntilFirstGame < 14 && hoursUntilNoonEST < 0))
+        // if it's close to the first game, or noon of the day of the first game, then user is not allowed to pick teams for this week - else not locked.
+        this.picks.isPastCutoff = hoursUntilFirstGame < 0.1 || (hoursUntilFirstGame < 14 && hoursUntilNoonEST < 0)
 
         return this.games
       },
@@ -245,6 +251,8 @@
         console.log('watched games changed', val)
         this.isLoading = Object.keys(this.picks).length === 0 || !this.league.users
       },
+      // sortedGames (val) {
+      // },
       picks (val) {
         console.log('watched picks changed', val)
         if (this.picks.isTotalYardsLocked) {
