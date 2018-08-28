@@ -220,8 +220,7 @@
         var isEST = date.getTime() < secondSundayInMarch.getTime() || date.getTime() > firstSundayInNovember.getTime()
         var noonEST = new Date(date.getFullYear() + '/' + (date.getMonth() + 1) + '/' + date.getDate() + ' 12:00 ' + (isEST ? 'EST' : 'EDT'))
         var hoursUntilNoonEST = (+noonEST - currentTime) / 1000 / 60 / 60
-        console.log('hoursUntilFirstGame', hoursUntilFirstGame, 'hoursUntilNoonEST', hoursUntilNoonEST)
-        console.log('hoursUntilFirstGame', hoursUntilFirstGame, 'hoursUntilNoonEST', hoursUntilNoonEST, (hoursUntilFirstGame < 14 && hoursUntilNoonEST < 0))
+        // console.log('hoursUntilFirstGame', hoursUntilFirstGame, 'hoursUntilNoonEST', hoursUntilNoonEST, (hoursUntilFirstGame < 14 && hoursUntilNoonEST < 0))
         // if it's close to the first game, or noon of the day of the first game, then user is not allowed to pick teams for this week - else not locked.
         this.picks.isPastCutoff = hoursUntilFirstGame < 0.1 || (hoursUntilFirstGame < 14 && hoursUntilNoonEST < 0)
 
