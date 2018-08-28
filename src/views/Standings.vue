@@ -69,7 +69,7 @@
 
     <div
       class="update-scores-link-container"
-      v-if="week === actualWeek && !allScoresAreFinal"
+      v-if="true || week === actualWeek && !allScoresAreFinal"
     >
       Did a game just end?
       <!-- todo: automate this instead -->
@@ -188,14 +188,14 @@
                 return Math.abs(userA.totalYards - actualTotalYards) < Math.abs(userB.totalYards - actualTotalYards) ? -1 : 1
               }
               // (reverse operates in-place, so let's use an old-fashioned loop instead)
-              var userASpread
-              var userBSpread
-              // var userASpreadGame
-              // var userBSpreadGame
+              var game
               var userAPick
               var userBPick
-              var game
               var gameSpread
+              var userASpreads = []
+              var userBSpreads = []
+              var userASpread
+              var userBSpread
               for (var i = this.sortedGames.length - 1; i >= 0; i--) {
                 game = this.sortedGames[i]
                 userAPick = userA.picks[game.gameId]
@@ -203,16 +203,23 @@
                 if (userAPick !== userBPick) {
                   gameSpread = Math.abs(game.homeTeam.score - game.visitorTeam.score)
                   if (userAPick !== game.winner) {
-                    userASpread = userASpread || gameSpread
-                    // userASpreadGame = userASpreadGame || game
+                    userASpreads.push(gameSpread)
                   } else {
-                    userBSpread = userBSpread || gameSpread
-                    // userBSpreadGame = userBSpreadGame || game
+                    userBSpreads.push(gameSpread)
                   }
                 }
               }
-              console.log('userASpread', userASpread, userBSpread/* , userASpreadGame, userBSpreadGame */)
-              return userASpread < userBSpread ? -1 : 1
+              // console.log('userASpreads', userASpreads, 'userBSpreads', userBSpreads)
+              // if the users have the same # of gamePoints, then they will have the same # of games lost & won,
+              // so we don't have to worry about one array being shorter or longer than the other.
+              for (var j = 0; j < userASpreads.length; j++) {
+                userASpread = userASpreads[j]
+                userBSpread = userBSpreads[j]
+                if (userASpread !== userBSpread) {
+                  return userASpread < userBSpread ? -1 : 1
+                }
+                // TODO - if we got to HERE, then userA and userB are completely TIED.
+              }
             }
             return userA.points > userB.points ? -1 : 1
           })
