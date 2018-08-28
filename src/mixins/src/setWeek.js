@@ -10,6 +10,7 @@ export default function setWeek (week) {
   if (week || week === 0) {
     this.week = '' + week
   }
+  sessionStorage.week = week || this.week || ''
   // location.hash = week || this.week || ''
   this.setPicksRef()
 }
