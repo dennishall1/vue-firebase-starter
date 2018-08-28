@@ -150,6 +150,7 @@
         )
       },
       standings () {
+        var J = window.J
         var leagueUsers = this.league.users
         var actualTotalYards = (this.sortedGames[this.sortedGames.length - 1] || {}).totalYards
         // console.log('STANDINGS :: this.league.users', Object.keys(this.league.users || {}))
@@ -227,7 +228,9 @@
 
         // update the db with game points, if we haven't already.
         var leadersPicksForThisWeek = _standings[0] && _standings[0].userId && this.leagueUserPicksForThisWeek(_standings[0].userId)
-        if (this.allScoresAreFinal && leadersPicksForThisWeek && !('isWinner' in leadersPicksForThisWeek)) {
+        console.log('leadersPicksForThisWeek, week', this.week, 'leadersPicksForThisWeek', J(leadersPicksForThisWeek), _standings[0] && _standings[0].userId)
+        if (!this.isUpdatingTotals && this.week === this.actualWeek && this.allScoresAreFinal && leadersPicksForThisWeek && !('isWinner' in leadersPicksForThisWeek)) {
+          this.isUpdatingScores = true
           _standings.forEach((userWeeklyStanding, i) => {
             var isWinner = i === 0
             var gamePoints = userWeeklyStanding.points
@@ -262,6 +265,7 @@
       return {
         isLoading: true,
         isUpdatingScores: false,
+        isUpdatingTotals: false,
         canUpdateScores: true,
         timeLastUpdatedScores: 0,
         minTimeBetweenUpdateScores: 9900,

@@ -10,6 +10,11 @@
   import MyHeader from '@/components/MyHeader'
   import MyFooter from '@/components/MyFooter'
 
+  // convenience function to help with dealing with promise/async/await abstractions.
+  window.J = function (o) {
+    return o && JSON.parse(JSON.stringify(o))
+  }
+
   export default {
     name: 'app',
     components: {

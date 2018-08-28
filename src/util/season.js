@@ -10,7 +10,7 @@ var regularSeasonStartDate = new Date(season + '-09-06 EST')
 // var regularSeasonEndDate = new Date(season, 11, 31, 23, 59, 59)
 var seasonType
 // var _week = parseInt(location.hash.replace(/^#/, ''), 10)
-var _week = parseInt(sessionStorage.week, 10)
+// var _week = parseInt(sessionStorage.week, 10)
 var week
 var minWeek = 0
 var maxWeek = 4
@@ -33,9 +33,9 @@ if (date < regularSeasonStartDate) {
 }
 
 // should we use the week in the sessionStorage? ~location hash?~
-if (_week >= minWeek && _week <= maxWeek) {
-  week = _week
-}
+// if (_week >= minWeek && _week <= maxWeek) {
+//   week = _week
+// }
 
 week = '' + (week | 0)
 

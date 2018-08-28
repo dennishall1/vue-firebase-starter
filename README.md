@@ -14,6 +14,8 @@ Progressive Web App (PWA) starter-kit using vue/vuex/vue(x)-router/offline-plugi
 
 // this year miami had a hurricane, so a game was postponed ..  but normally, you can just check if all games for a given week are 'final'
 
+- [ ] fix the season total accruals
+- [ ] instead of waiting for the actual end of the game-week, consider the week to be over as soon as the last game of the week is over -- and then default the pages to the new idea of what the current week is.
 - [ ] Account for a complete, true tie.
 - [*] Track the Week-points and game-points.
 - [*] ^ Show them.
