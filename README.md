@@ -10,6 +10,9 @@
 Progressive Web App (PWA) starter-kit using vue/vuex/vue(x)-router/offline-plugin, with sass, prerendering, muse-ui, and firebase/firebaseui!
 </p>
 
+## Instructions:
+Update `UpdateScores.vue` for the current season & week.  Update apify > crawlers > basic settings > Start URLs for pre/reg/post and week.  Run apify crawler, then go to /update-scores.  That route gets the results from the latest apify run and updates the schedule part of the database.
+
 ## Todos
 
 // this year miami had a hurricane, so a game was postponed ..  but normally, you can just check if all games for a given week are 'final'
@@ -24,7 +27,6 @@ Progressive Web App (PWA) starter-kit using vue/vuex/vue(x)-router/offline-plugi
 - [*] Default to the current week
 - [ ] lower priority .. go ahead and award the winner once it is impossible for anyone to catch up.
 - [ ] SHOW the "KING" symbol next to the user's name in more places than just the standings page -- f/x, next to their picks on the landing page -- perhaps as easy as keeping track of uuid for *current* king -- and set that inside of the 'update scores' function.
-- [ ] Instructions: update `UpdateScores.vue` for the current season & week.  Update apify run script for pre/reg/post and week.  Run apify script, then go to /update-scores.  That route gets the results from the latest apify run and updates the schedule part of the database.
 - [*] Refactor to improve maintainability: don't calculate the season and seasonType and week in multiple places.
 - [*] Actually calculate and declare the King of the Week (pretty much done)
 - [ ] Refactor to merge the picks and landing pages. - right now it's a little bit confusing naming and what does the football

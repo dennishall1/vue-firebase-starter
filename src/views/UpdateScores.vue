@@ -38,7 +38,7 @@
   import firebase from 'firebase'
   import fetch from 'unfetch'
   import TeamCard from '@/components/TeamCard'
-  import { season, seasonType } from '@/util/season'
+  // import { season, seasonType } from '@/util/season'
 
   // console.log(season, seasonType)
 
@@ -67,7 +67,13 @@
     },
     watch: {
       user (val) {
-        var _week = '1'
+        var _season = '2018'
+        var _seasonType = 'REG'
+        // the week is obtained from the crawl result
+        // var _week = '1'
+
+        // this block is not used -- it USED TO BE to actually update the scores, but now that's done on the Standings page.
+        /** /
         if (0 && val) {
           // get the user ids for the current league
           fetch('https://api.apify.com/v1/rs7ntQdHsu4L2g8iA/crawlers/5cCo62Xs7omPRqtNR/lastExec/results?token=icrF4BDXjBePhFcqHFmtd9rf9&format=json&status=SUCCEEDED&r=102')
@@ -75,12 +81,12 @@
               return response.json()
             })
             .then(json => {
-              var weekDb = firebase.database().ref('/schedules/season/2018/PRE/week/' + _week)
+              var weekDb = firebase.database().ref('/schedules/season/' + _season + '/' + _seasonType + '/week/' + _week)
               console.log('apify json', json)
               console.log('firebase json', JSON.stringify(weekDb))
               this.isLoading = false
-              this.season = '2018'
-              this.seasonType = 'PRE'
+              this.season = _season
+              this.seasonType = _seasonType
               this.week = _week
               json[0].pageFunctionResult.forEach(game => {
                 // find the matching game in the db and set the score
@@ -114,16 +120,17 @@
               console.log('parsing failed', ex)
             })
         }
+        /**/
 
-        if (0 && seasonType === 'PRE') {
+        if (0 && _seasonType === 'REG') {
           fetch('https://api.apify.com/v1/rs7ntQdHsu4L2g8iA/crawlers/5cCo62Xs7omPRqtNR/lastExec/results?token=icrF4BDXjBePhFcqHFmtd9rf9&format=json&status=SUCCEEDED')
             .then(response => {
               return response.json()
             })
             .then(json => {
               this.isLoading = false
-              this.season = season
-              this.seasonType = seasonType
+              this.season = _season
+              this.seasonType = _seasonType
               var updateObj = []
               json[0].pageFunctionResult.forEach(game => {
                 var week = this.week = '' + game.week
@@ -131,7 +138,7 @@
                 console.log('game from json', 'week', week, 'gameId', game.gameId, 'game', game)
                 updateObj.push(game)
               })
-              firebase.database().ref(`/schedules/season/${season}/PRE/week/${this.week}`).set(updateObj)
+              firebase.database().ref(`/schedules/season/${_season}/${_seasonType}/week/${this.week}`).set(updateObj)
               console.log('parsed json', this.games)
             }).catch(ex => {
               console.log('parsing failed', ex)
