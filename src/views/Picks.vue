@@ -209,11 +209,13 @@
         ].join(' ')))
         var hoursUntilFirstGame = (firstGameTime - currentTime) / 1000 / 60 / 60
         var date = new Date()
-        var secondSundayInMarch = new Date(date.getFullYear() + '/03/01 02:30 EDT')
+        // "EDT"
+        var secondSundayInMarch = new Date(date.getFullYear() + '-03-01T02:30:00-04:00')
         while (secondSundayInMarch.getDay() !== 0) {
           secondSundayInMarch = new Date(secondSundayInMarch.getTime() + (24 * 60 * 60 * 1000))
         }
-        var firstSundayInNovember = new Date(date.getFullYear() + '/11/01 02:30 EDT')
+        // "EDT"
+        var firstSundayInNovember = new Date(date.getFullYear() + '-11-01T02:30:00-04:00')
         while (firstSundayInNovember.getDay() !== 0) {
           firstSundayInNovember = new Date(firstSundayInNovember.getTime() + (24 * 60 * 60 * 1000))
         }

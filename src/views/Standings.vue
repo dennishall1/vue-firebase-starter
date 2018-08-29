@@ -69,7 +69,7 @@
 
     <div
       class="update-scores-link-container"
-      v-if="true || week === actualWeek && !allScoresAreFinal"
+      v-if="league.owner === user.uid || (week === actualWeek && !allScoresAreFinal)"
     >
       Did a game just end?
       <!-- todo: automate this instead -->
@@ -156,7 +156,7 @@
         // console.log('STANDINGS :: this.league.users', Object.keys(this.league.users || {}))
         // console.log('STANDINGS :: this.games', JSON.stringify(this.games || ''))
         if (this.allScoresAreFinal && !actualTotalYards) return
-        console.log((this.sortedGames[this.sortedGames.length - 1] || {}).homeTeam.score)
+        console.log('(this.sortedGames[this.sortedGames.length - 1] || {}).homeTeam.score', (this.sortedGames[this.sortedGames.length - 1] || {}).homeTeam.score)
         var _standings = (
           Object.keys(leagueUsers || {})
           .map(userId => {

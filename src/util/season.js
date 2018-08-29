@@ -5,8 +5,9 @@
 var date = new Date()
 // if the date is March or earlier, then it is still the previous year's season.
 var season = date.getFullYear() - (date.getMonth() < 3 ? 1 : 0)
-var preSeasonStartDate = new Date(season + '-08-02 EST')
-var regularSeasonStartDate = new Date(season + '-09-06 EST')
+// "EDT"
+var preSeasonStartDate = new Date(season + '-08-02T02:00:00-05:00')
+var regularSeasonStartDate = new Date(season + '-09-06T02:00:00-05:00')
 // var regularSeasonEndDate = new Date(season, 11, 31, 23, 59, 59)
 var seasonType
 // var _week = parseInt(location.hash.replace(/^#/, ''), 10)
