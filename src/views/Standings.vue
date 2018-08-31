@@ -201,26 +201,25 @@
                 game = this.sortedGames[i]
                 userAPick = userA.picks[game.gameId]
                 userBPick = userB.picks[game.gameId]
-                if (userAPick !== userBPick) {
-                  gameSpread = Math.abs(game.homeTeam.score - game.visitorTeam.score)
-                  if (userAPick !== game.winner) {
-                    userASpreads.push(gameSpread)
-                  } else {
-                    userBSpreads.push(gameSpread)
-                  }
+                gameSpread = Math.abs(game.homeTeam.score - game.visitorTeam.score)
+                if (userAPick !== game.winner) {
+                  userASpreads.push(gameSpread)
+                }
+                if (userBPick !== game.winner) {
+                  userBSpreads.push(gameSpread)
                 }
               }
               // console.log('userASpreads', userASpreads, 'userBSpreads', userBSpreads)
               // if the users have the same # of gamePoints, then they will have the same # of games lost & won,
-              // so we don't have to worry about one array being shorter or longer than the other.
+              // so we don't have to worry about one array being longer or shorter than the other.
               for (var j = 0; j < userASpreads.length; j++) {
                 userASpread = userASpreads[j]
                 userBSpread = userBSpreads[j]
                 if (userASpread !== userBSpread) {
                   return userASpread < userBSpread ? -1 : 1
                 }
-                // TODO - if we got to HERE, then userA and userB are completely TIED.
               }
+              // TODO - if we got to HERE, then userA and userB are completely TIED.
             }
             return userA.points > userB.points ? -1 : 1
           })
