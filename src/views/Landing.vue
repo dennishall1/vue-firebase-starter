@@ -85,7 +85,7 @@
               (leagueUserPicks[game.gameId] || [[], []])[0].length,
               (leagueUserPicks[game.gameId] || [[], []])[1].length
             ),
-            'in-progress': game.phase !== 'PRE' && game.phase !== 'FINAL'
+            'in-progress': game.phase !== 'PRE' && !/final/i.test(game.phase)
           }"
         >
           <team-card

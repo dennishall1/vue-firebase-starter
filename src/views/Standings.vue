@@ -110,7 +110,7 @@
       }),
       allScoresAreFinal () {
         return !this.games.some(game => {
-          return game.phase !== 'FINAL'
+          return !/final/i.test(game.phase)
         })
       },
       numLeagueUsers () {
@@ -172,7 +172,7 @@
                 if (!game) return points
                 game.winner = '' + Number(game.homeTeam.score > game.visitorTeam.score)
                 return points + (
-                  game.phase === 'FINAL' &&
+                  /final/i.test(game.phase) &&
                   leagueUserPicksForThisWeek[gameId] === game.winner
                     ? 1
                     : 0
@@ -371,8 +371,8 @@
                       updateObject[key].phase = game.score.phase
                       snapshot.ref.update(updateObject)
                       // if the score is final, and we don't already have the totalYards, flag this game as needing to get the total yards
-                      console.log('totalYards ?', gameId, game.score.phase, gameFromDb.totalYards, game.score.phase === 'FINAL', !gameFromDb.totalYards)
-                      if (game.score.phase === 'FINAL' && !gameFromDb.totalYards) {
+                      console.log('totalYards ?', gameId, game.score.phase, gameFromDb.totalYards, 'is final?', /final/i.test(game.score.phase), !gameFromDb.totalYards)
+                      if (/final/i.test(game.score.phase) && !gameFromDb.totalYards) {
                         gameIdsThatNeedTotalYards.push(gameId)
                         // fetch('https://corsify.appspot.com/http://www.nfl.com/liveupdate/game-center/' + gameId + '/' + gameId + '_gtd.json')
                       }

@@ -17,9 +17,11 @@ Update `UpdateScores.vue` for the current season & week.  Update apify > crawler
 
 // this year miami had a hurricane, so a game was postponed ..  but normally, you can just check if all games for a given week are 'final'
 
-- [ ] add season (year) & season type (pre/reg/post) dropdowns
-- [ ] fix the season total accruals
-- [ ] instead of waiting for the actual end of the game-week, consider the week to be over as soon as the last game of the week is over -- and then default the pages to the new idea of what the current week is.
+- [*] Account for FINAL_OVERTIME games as being the same as FINAL phase.
+- [*] Account for tied-score games (don't call the visitor team the winner)
+- [ ] Add season (year) & season type (pre/reg/post) dropdowns
+- [ ] Fix the season total accruals .. might be done now.
+- [ ] Instead of waiting for the actual end of the game-week, consider the week to be over as soon as the last game of the week is over -- and then default the pages to the new idea of what the current week is.
 - [ ] Account for a complete, true tie.
 - [*] Track the Week-points and game-points.
 - [*] ^ Show them.
@@ -49,15 +51,16 @@ Update `UpdateScores.vue` for the current season & week.  Update apify > crawler
 - [ ] Make weeks bookmarkable - reconsider, maybe this isn't a great idea.  Seems better to have it always the current week.  Use *session* variable for current week selection.
 - [ ] Improve DB security: Only allow users to make picks for their own account 
 - [ ] Refactor for resiliency: Use team nickname or abbreviation instead of `0` for away team and `1` for home team.
-- [ ] Refactor for reduced db storage and improved code simplicity: <br>&nbsp;&nbsp;&nbsp;&nbsp;
-      Instead of leagues/users/{userId}/season/... Use a datastructure nearly identical to the season, and store a minimal user reference 'under' the game for that week  
-- [ ] Refactor for consistency: Add `seasonType` to the paths `/season/2017/REG/week/12` -> `/season/2017/seasonType/REG/week/12`
-- [ ] Consider to refactor to eliminate `picks` object, instead just use `league`
+- [*] Consider to refactor to eliminate `picks` object, instead just use `league`
 - [ ] Refactor Standings to reduce db load (only check top two players' spread).
 - [ ] Allow users to delete their account
 - [ ] Email users if they have the exact same picks as someone else
 - [ ] Email users N hours before the first game if they haven't made their picks yet
 - [ ] Email users N hours after the last game to inform them who won for the week
+- [ ] Refactor for consistency: Add `seasonType` to the paths `/season/2017/REG/week/12` -> `/season/2017/seasonType/REG/week/12`
+- [ ] Games are not considered irrelevant if a person has made some picks, and not locked in their picks.
+- [ ] Not sure if this is a good idea anymore: Refactor for reduced db storage and improved code simplicity: <br>&nbsp;&nbsp;&nbsp;&nbsp;
+      Instead of leagues/users/{userId}/season/... Use a datastructure nearly identical to the season, and store a minimal user reference 'under' the game for that week  
 
 ## Features
 

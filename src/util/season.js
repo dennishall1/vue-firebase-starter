@@ -7,6 +7,7 @@ var date = new Date()
 var season = date.getFullYear() - (date.getMonth() < 3 ? 1 : 0)
 // "EDT"
 // var preSeasonStartDate = new Date(season + '-08-02T02:00:00-05:00')
+// consider starting regular season on Tuesday morning instead of Thursday morning.
 var regularSeasonStartDate = new Date(season + '-09-06T02:00:00-05:00')
 // var regularSeasonEndDate = new Date(season, 11, 31, 23, 59, 59)
 var seasonType
