@@ -170,7 +170,7 @@
                 var game = this.games.find(game => { return '' + game.gameId === '' + gameId })
                 // console.log('userId', userId, 'gameId', gameId, 'game', game, game && (game.homeTeam.score + ', ' + game.visitorTeam.score))
                 if (!game) return points
-                game.winner = '' + Number(game.homeTeam.score > game.visitorTeam.score)
+                game.winner = '' + (game.homeTeam.score !== game.visitorTeam.score ? Number(game.homeTeam.score > game.visitorTeam.score) : '')
                 return points + (
                   /final/i.test(game.phase) &&
                   leagueUserPicksForThisWeek[gameId] === game.winner
