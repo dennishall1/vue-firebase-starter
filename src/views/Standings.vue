@@ -125,6 +125,13 @@
         })
         return this.games
       },
+      needsActualTotalYards () {
+        var _this = this
+        var leagueUsers = this.league.users
+        return Object.keys(leagueUsers || {}) > 0 && Object.keys(leagueUsers || {}).some(userId => {
+          return typeof _this.leagueUserPicksForThisWeek(userId).totalYards !== 'undefined'
+        })
+      },
       seasonStandings () {
         var leagueUsers = (this.league || {}).users || {}
         return (
@@ -150,13 +157,18 @@
         )
       },
       standings () {
+        // var _this = this
         var J = window.J
         var leagueUsers = this.league.users
         var actualTotalYards = (this.sortedGames[this.sortedGames.length - 1] || {}).totalYards
+        // var needsActualTotalYards = Object.keys(leagueUsers || {}) > 0 && Object.keys(leagueUsers || {}).some(userId => {
+        //   return typeof _this.leagueUserPicksForThisWeek(userId).totalYards !== 'undefined'
+        // })
         // console.log('STANDINGS :: this.league.users', Object.keys(this.league.users || {}))
         // console.log('STANDINGS :: this.games', JSON.stringify(this.games || ''))
-        if (this.allScoresAreFinal && !actualTotalYards) return
-        console.log('(this.sortedGames[this.sortedGames.length - 1] || {}).homeTeam.score', (this.sortedGames[this.sortedGames.length - 1] || {}).homeTeam.score)
+        // todo - instead of simply returning (and not rendering the standings at all), set a flag indicating that the results will not be accurate until the actual total yards are available -- and message the user.
+        // if (this.allScoresAreFinal && needsActualTotalYards && !actualTotalYards) return
+        // console.log('(this.sortedGames[this.sortedGames.length - 1] || {}).homeTeam.score', (this.sortedGames[this.sortedGames.length - 1] || {}).homeTeam.score)
         var _standings = (
           Object.keys(leagueUsers || {})
           .map(userId => {
@@ -304,6 +316,7 @@
         var _this = this
         var now = Date.now()
         var gameIdsThatNeedTotalYards = []
+        var lastGameId = this.games[this.games.length - 1].gameId
         if (now - this.timeLastUpdatedScores > this.minTimeBetweenUpdateScores) {
           this.isUpdatingScores = true
           this.canUpdateScores = false
@@ -372,7 +385,7 @@
                       snapshot.ref.update(updateObject)
                       // if the score is final, and we don't already have the totalYards, flag this game as needing to get the total yards
                       console.log('totalYards ?', gameId, game.score.phase, gameFromDb.totalYards, 'is final?', /final/i.test(game.score.phase), !gameFromDb.totalYards)
-                      if (/final/i.test(game.score.phase) && !gameFromDb.totalYards) {
+                      if (gameId === lastGameId && /final/i.test(game.score.phase) && !gameFromDb.totalYards && this.needsActualTotalYards) {
                         gameIdsThatNeedTotalYards.push(gameId)
                         // fetch('https://corsify.appspot.com/http://www.nfl.com/liveupdate/game-center/' + gameId + '/' + gameId + '_gtd.json')
                       }
@@ -463,9 +476,10 @@
 
               console.log('parsed json', json.gameScores)
             }).catch(ex => {
+              // based on how `fetch` works, we only get here if the user lost internet connection.
               _this.isUpdatingScores = false
               _this.canUpdateScores = true
-              console.log('parsing failed', ex)
+              console.log('network failed', ex)
             })
         }
       },
